@@ -8,6 +8,7 @@ import (
 	"github.com/BalkanTech/goilerplate/config"
 	"strings"
 	"errors"
+	"gopkg.in/mgo.v2"
 )
 
 // ErrNotGorm is used in case when the database type in the config file isn't a Gorm type of database
@@ -28,6 +29,10 @@ func NewGormConnection(c *config.Config) (*gorm.DB, error) {
 
 	return gorm.Open(c.Database.GetType(), s)
 
+}
+
+func NewMgoConnection(c *config.Config) (*mgo.Session, error) {
+	return mgo.Dial("server1.example.com,server2.example.com")
 }
 
 //ToDO: Implement MongoDB
