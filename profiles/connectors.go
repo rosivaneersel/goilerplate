@@ -1,17 +1,19 @@
 package profiles
 
-type UserTestDB struct {
-	DB *TestDB
+import "github.com/jinzhu/gorm"
+
+type ProfileGorm struct {
+	DB *gorm.DB
 }
 
-func (o *UserTestDB) Get(id uint) (*User, error) {
-	user := &User{}
-	err := o.DB.First(user, id)
+func (o *ProfileGorm) Get(id uint) (*Profile, error) {
+	obj := &Profile{}
+	err := o.DB.First(obj, id).Error
 
-	return user, err
+	return obj, err
 }
 
-func NewPageManagerTestDB(db *TestDB) *UserTestDB {
-	return &UserTestDB{DB: db}
+func NewPageManagerGorm(db *gorm.DB) *ProfileGorm {
+	return &ProfileGorm{DB: db}
 }
 

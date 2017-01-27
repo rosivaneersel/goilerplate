@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"fmt"
 	"strings"
+	"gopkg.in/mgo.v2"
 )
 
 // Database implements database connection configuration details
@@ -20,6 +21,52 @@ type Database struct {
 	Charset string // For mysql only
 	ParseTime bool // For mysql only
 	Local string // For mysql only
+
+	Mode string // MongoDB only
+}
+
+func (d *Database) getMongoDBConnectionString() (string, error)  {
+	if d.GetType() != "mongodb" {
+		return "", &configError{"Database:Type", "Field not or incorrectly set"}
+	}
+
+	if d.Host == "" {
+		return "", &configError{"Database:Host", "Field not set"}
+	}
+
+	if d.DB == "" {
+		return "", &configError{"Database:DB", "Field not set"}
+	}
+
+	return d.Host, nil
+}
+
+// GetMongoMode returns a mgo.Mode based upon the settings of the configuration file. The default mode is mgo.Strong
+func (d *Database) GetMongoMode() (mgo.Mode, error)  {
+	if d.GetType() != "mongodb" {
+		return -1, &configError{"Database:Type", "Field not or incorrectly set"}
+	}
+
+	switch(strings.ToLower(d.Mode)) {
+		case "primary":
+			return mgo.Primary, nil
+		case "primary_preferred":
+			return mgo.PrimaryPreferred, nil
+		case "secondary":
+			return mgo.Secondary, nil
+		case "secondary_preferred":
+			return mgo.SecondaryPreferred, nil
+		case "nearest":
+			return mgo.Nearest, nil
+		case "eventual":
+			return mgo.Eventual, nil
+		case "monotonic":
+			return mgo.Monotonic, nil
+		case "strong":
+			return mgo.Strong, nil
+		default:
+			return mgo.Strong, nil
+	}
 }
 
 func (d *Database) getSqLite3ConnectionString() (string, error) {
@@ -88,6 +135,8 @@ func (d *Database) GetDBConnectionString() (string, error) {
 			return d.getPostgresConnectionString()
 		case "mysql":
 			return d.getMySQLConnectionString()
+		case "mongodb":
+			return d.getMongoDBConnectionString()
 		default:
 			return "", &configError{"Database:Type", "Unsported database type"}
 	}

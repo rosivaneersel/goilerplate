@@ -27,7 +27,8 @@ func (u *User) SetPassword(password string) error {
 		return err
 	}
 
-	u.Password = h
+	u.Password = string(h)
+	return nil
 }
 
 // UserManager is an interface for database connectors which provide the interaction between the model and the database
@@ -35,7 +36,7 @@ type UserManager interface {
 	GetByID(id uint) (*User, error)
 	GetByEmail(email string) (*User, error)
 	Get(query interface{}) (*User, error)
-	Find(query interface{}) (*Users, error)
+	//Find(query interface{}) (*Users, error)
 	Authenticate(user string, password string, authBy uint) (*User, error)
 }
 
