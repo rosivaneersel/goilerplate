@@ -21,6 +21,7 @@ type responseData struct {
 	Alerts []alerts.Alert
 }
 
+var DefaultFiles = []string{"templates/index.html", "templates/_nav.html"}
 var Alerts = []alerts.Alert{}
 
 func (v *View) Execute(w http.ResponseWriter) {
@@ -41,7 +42,8 @@ func (v *View) DefaultHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewView(title string, layout string, files ...string) *View {
-	t := template.Must(template.ParseFiles(files...))
-	v := &View{template: t}
+	fs := append(DefaultFiles, files...)
+	t := template.Must(template.ParseFiles(fs...))
+	v := &View{template: t, layout: layout, Title: title}
 	return v
 }

@@ -32,16 +32,19 @@ func main() {
 
 	router := webserver.Router
 
-	rootView := view.NewView("Goilerplate", "base", "templates/index.html", "_nav.html")
+	rootView := view.NewView("Goilerplate", "base", "templates/root.html")
 	router.HandleFunc("/", rootView.DefaultHandler)
 
 	UserController = users.NewUserManagerGorm(DB)
 
-	loginView := view.NewView("Login", "base", "templates/index.html", "_nav.html", "templates/login.html")
+	loginView := view.NewView("Login", "base", "templates/login.html")
 	router.HandleFunc("/login", loginView.DefaultHandler).Methods("GET")
 
 	router.HandleFunc("/login", LoginHandler).Methods("POST")
 	router.HandleFunc("/logout", LogoutHandler)
+
+	registerView := view. NewView("Register", "base", "templates/register.html")
+	router.HandleFunc("/register", registerView.DefaultHandler)
 
 	err = webserver.Start(*configFile)
 	if err != nil {
