@@ -1,8 +1,7 @@
-package config_test
+package config
 
 import (
 	"testing"
-	"github.com/BalkanTech/goilerplate/config"
 	"reflect"
 )
 
@@ -11,9 +10,9 @@ const testFailed = "\u2718"
 
 func TestSaveAndLoadConfig(t *testing.T) {
 	file := "/tmp/config.json"
-	expectedConfig := &config.Config{
+	expectedConfig := &Config{
 		File: file,
-		Database: config.Database{
+		Database: Database{
 			Type: "sqlite",
 			DB: "/tmp/test.db",
 		},
@@ -23,8 +22,8 @@ func TestSaveAndLoadConfig(t *testing.T) {
 	{
 		t.Log("\tTesting config without a file set.")
 		{
-			expectedErr := config.ErrFileNotSet
-			c := &config.Config{}
+			expectedErr := ErrFileNotSet
+			c := &Config{}
 
 			t.Log("\t\tTesting Save")
 			{
@@ -58,7 +57,7 @@ func TestSaveAndLoadConfig(t *testing.T) {
 
 		t.Log("\tTesting Load")
 		{
-			c := &config.Config{File: file}
+			c := &Config{File: file}
 			err := c.Load()
 			if err != nil {
 				t.Fatalf("\t\tExpected to be able to load config, but got error: %s. %v", err, testFailed)
@@ -75,14 +74,14 @@ func TestSaveAndLoadConfig(t *testing.T) {
 
 func TestDBConnectionStringCreators(t *testing.T) {
 	type Test struct {
-		c config.Config
+		c Config
 		expected string
 	}
 
 	Tests := []Test{
 		{
-			config.Config{
-				Database: config.Database{
+			Config{
+				Database: Database{
 					Type: "sqlite3",
 					DB:   "/tmp/test.db",
 				},
@@ -90,8 +89,8 @@ func TestDBConnectionStringCreators(t *testing.T) {
 			"/tmp/test.db",
 		},
 		{
-			config.Config{
-				Database: config.Database{
+			Config{
+				Database: Database{
 					Type: "postgres",
 					DB: "mydb",
 					Host: "myhost",
@@ -108,8 +107,8 @@ func TestDBConnectionStringCreators(t *testing.T) {
 			"host=myhost user=myuser password=mypassword dbname=mydb sslmode=disable",
 		},
 		{
-			config.Config{
-				Database: config.Database{
+			Config{
+				Database: Database{
 					Type: "mysql",
 					DB: "mydb",
 					Host: "myhost",
@@ -126,8 +125,8 @@ func TestDBConnectionStringCreators(t *testing.T) {
 			"myuser:mypassword@myhost/mydb?charset=utf8&parseTime=false&loc=Local",
 		},
 		{
-			config.Config{
-				Database: config.Database{
+			Config{
+				Database: Database{
 					Type: "mysql",
 					DB: "mydb",
 					Host: "localhost",
@@ -142,6 +141,30 @@ func TestDBConnectionStringCreators(t *testing.T) {
 				},
 			},
 			"myuser:mypassword@/mydb?charset=utf8&parseTime=false&loc=Local",
+		},
+		{
+			Config{
+				Database: Database{
+					Type: "mongodb",
+					DB: "test",
+					Host: "localhost",
+					Mode: "Monotonic",
+				},
+			},
+			"mongodb://localhost/test",
+		},
+		{
+			Config{
+				Database: Database{
+					Type: "mongodb",
+					DB: "test",
+					User: "test",
+					Password: "test",
+					Host: "127.0.0.1",
+					Mode: "Monotonic",
+				},
+			},
+			"mongodb://test:test@127.0.0.1/test",
 		},
 	}
 
@@ -166,4 +189,25 @@ func TestDBConnectionStringCreators(t *testing.T) {
 	}
 }
 
-//ToDo: Update tests for Database connection string functions
+func TestServerAddr(t *testing.T) {
+	tests := []struct{
+		Cfg Config
+		Expected string
+		Description string
+	}{
+		{Config{Server:Server{}}, ":8000", "Empty host and port"},
+		{Config{Server:Server{Host:"localhost"}}, "localhost:8000", "Localhost with empty port"},
+		{Config{Server:Server{Host:"localhost", Port: 8080}}, "localhost:8080", "Localhost on port 80"},
+	}
+
+	for _, test := range tests{
+		t.Logf("Testing creation of webserver address with host: %s and port: %d", test.Cfg.Server.Host, test.Cfg.Server.Port)
+		{
+			addr := test.Cfg.Server.Addr()
+			if addr != test.Expected {
+				t.Fatalf("\tExpected: \"%s\", but got \"%s\" instead. %v", test.Expected, addr, testFailed)
+			}
+			t.Logf("\tExpected: \"%s\". %v", test.Expected, testOK)
+		}
+	}
+}

@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"fmt"
 	"strings"
+	"gopkg.in/mgo.v2"
+	"time"
 )
 
 // Database implements database connection configuration details
@@ -20,6 +22,59 @@ type Database struct {
 	Charset string // For mysql only
 	ParseTime bool // For mysql only
 	Local string // For mysql only
+
+	Mode string // MongoDB only
+}
+
+func (d *Database) getMongoDBConnectionString() (string, error)  {
+	if d.GetType() != "mongodb" {
+		return "", &configError{"Database:Type", "Field not or incorrectly set"}
+	}
+
+	if d.Host == "" {
+		return "", &configError{"Database:Host", "Field not set"}
+	}
+
+	if d.DB == "" {
+		return "", &configError{"Database:DB", "Field not set"}
+	}
+
+	str := "mongodb://"
+	if d.User != "" {
+		str += fmt.Sprintf("%s:%s@%s/%s", d.User, d.Password, d.Host, d.DB)
+	} else {
+		str += fmt.Sprintf("%s/%s", d.Host, d.DB)
+	}
+
+	return str, nil
+}
+
+// GetMongoMode returns a mgo.Mode based upon the settings of the configuration file. The default mode is mgo.Strong
+func (d *Database) GetMongoMode() (mgo.Mode, error)  {
+	if d.GetType() != "mongodb" {
+		return -1, &configError{"Database:Type", "Field not or incorrectly set"}
+	}
+
+	switch(strings.ToLower(d.Mode)) {
+		case "primary":
+			return mgo.Primary, nil
+		case "primary_preferred":
+			return mgo.PrimaryPreferred, nil
+		case "secondary":
+			return mgo.Secondary, nil
+		case "secondary_preferred":
+			return mgo.SecondaryPreferred, nil
+		case "nearest":
+			return mgo.Nearest, nil
+		case "eventual":
+			return mgo.Eventual, nil
+		case "monotonic":
+			return mgo.Monotonic, nil
+		case "strong":
+			return mgo.Strong, nil
+		default:
+			return mgo.Strong, nil
+	}
 }
 
 func (d *Database) getSqLite3ConnectionString() (string, error) {
@@ -88,6 +143,8 @@ func (d *Database) GetDBConnectionString() (string, error) {
 			return d.getPostgresConnectionString()
 		case "mysql":
 			return d.getMySQLConnectionString()
+		case "mongodb":
+			return d.getMongoDBConnectionString()
 		default:
 			return "", &configError{"Database:Type", "Unsported database type"}
 	}
@@ -98,12 +155,46 @@ func (d *Database) GetType() string {
 	return strings.ToLower(d.Type)
 }
 
+type Server struct {
+	Host string
+	Port uint64
+	ReadTimeout time.Duration
+	WriteTimeout time.Duration
+	MaxHeaderBytes int
+	//ToDo: TLS Config
+}
+
+func (s *Server) EnsureDefaults() {
+	if s.Port == 0 {
+		s.Port = 8000
+	}
+
+	if s.ReadTimeout == 0 {
+		s.ReadTimeout = 10
+	}
+
+	if s.WriteTimeout == 0 {
+		s.WriteTimeout = 10
+	}
+
+	if s.MaxHeaderBytes == 0 {
+		s.MaxHeaderBytes = 1 << 20
+	}
+}
+
+func (s *Server) Addr() string{
+	s.EnsureDefaults()
+
+	return fmt.Sprintf("%s:%d", s.Host, s.Port)
+}
+
 // Config implements configuration details.
 // File: Contains a string to the configuration file
 // Database: Contains database configuration details
 type Config struct {
 	File string `json:"-"`
 	Database Database `json:"database"`
+	Server Server `json:"webserver"`
 }
 
 // Load will load the database file into the Config instance
@@ -142,5 +233,3 @@ func (c *Config) Save() error {
 
 	return nil
 }
-
-//ToDo: Implement MongoDB

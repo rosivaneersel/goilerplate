@@ -1,0 +1,6 @@
+{
+  "Database": {
+    "Type": "sqlite3",
+    "DB": "goilerplate.db"
+  }
+}
