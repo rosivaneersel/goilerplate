@@ -2,20 +2,39 @@ package users
 
 import (
 	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/mgo.v2/bson"
+	"time"
 )
 
 const (
-	AuthByUsername uint = 0
-	AuthByEmail uint = 1
+	AuthByUsername        uint = 0
+	AuthByEmail           uint = 1
 	AuthByUsernameOrEmail uint = 2
 )
 
 // User implements a user model
 type User struct {
-	ID uint
-	Username string
-	Email  string
-	Password string
+	GID uint          `gorm:"column:id; primary_key" bson:"-"`
+	MID bson.ObjectId `bson:"_id" gorm:"-"`
+
+	Username  string
+	Email     string
+	Password  string
+	ChangePassword bool
+	IsAdmin bool
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time
+}
+
+func (u *User) ID() string {
+	if u.GID != 0 {
+		return string(u.GID)
+	} else if u.MID.Valid() {
+		return u.MID.String()
+	}
+
+	return ""
 }
 
 //SetPassword hashes the given password and stores it into the User instance
@@ -33,11 +52,15 @@ func (u *User) SetPassword(password string) error {
 
 // UserManager is an interface for database connectors which provide the interaction between the model and the database
 type UserManager interface {
-	GetByID(id uint) (*User, error)
+	Init(drop bool) error
+	GetByID(id string) (*User, error)
 	GetByEmail(email string) (*User, error)
-	Get(query interface{}) (*User, error)
-	//Find(query interface{}) (*Users, error)
+	Get(query interface{}, values ...interface{}) (*User, error)
+	Find(query interface{}, values ...interface{}) (*[]User, error)
 	Authenticate(user string, password string, authBy uint) (*User, error)
+	Create(*User) error
+	Update(*User) error
+	Delete(*User) error
 }
 
 // Users implements the controller functions.

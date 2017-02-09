@@ -151,7 +151,20 @@ func TestDBConnectionStringCreators(t *testing.T) {
 					Mode: "Monotonic",
 				},
 			},
-			"localhost",
+			"mongodb://localhost/test",
+		},
+		{
+			Config{
+				Database: Database{
+					Type: "mongodb",
+					DB: "test",
+					User: "test",
+					Password: "test",
+					Host: "127.0.0.1",
+					Mode: "Monotonic",
+				},
+			},
+			"mongodb://test:test@127.0.0.1/test",
 		},
 	}
 
@@ -176,4 +189,25 @@ func TestDBConnectionStringCreators(t *testing.T) {
 	}
 }
 
-//ToDo: Update tests for Database connection string functions
+func TestServerAddr(t *testing.T) {
+	tests := []struct{
+		Cfg Config
+		Expected string
+		Description string
+	}{
+		{Config{Server:Server{}}, ":8000", "Empty host and port"},
+		{Config{Server:Server{Host:"localhost"}}, "localhost:8000", "Localhost with empty port"},
+		{Config{Server:Server{Host:"localhost", Port: 8080}}, "localhost:8080", "Localhost on port 80"},
+	}
+
+	for _, test := range tests{
+		t.Logf("Testing creation of webserver address with host: %s and port: %d", test.Cfg.Server.Host, test.Cfg.Server.Port)
+		{
+			addr := test.Cfg.Server.Addr()
+			if addr != test.Expected {
+				t.Fatalf("\tExpected: \"%s\", but got \"%s\" instead. %v", test.Expected, addr, testFailed)
+			}
+			t.Logf("\tExpected: \"%s\". %v", test.Expected, testOK)
+		}
+	}
+}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 	"gopkg.in/mgo.v2"
+	"time"
 )
 
 // Database implements database connection configuration details
@@ -38,7 +39,14 @@ func (d *Database) getMongoDBConnectionString() (string, error)  {
 		return "", &configError{"Database:DB", "Field not set"}
 	}
 
-	return d.Host, nil
+	str := "mongodb://"
+	if d.User != "" {
+		str += fmt.Sprintf("%s:%s@%s/%s", d.User, d.Password, d.Host, d.DB)
+	} else {
+		str += fmt.Sprintf("%s/%s", d.Host, d.DB)
+	}
+
+	return str, nil
 }
 
 // GetMongoMode returns a mgo.Mode based upon the settings of the configuration file. The default mode is mgo.Strong
@@ -147,12 +155,46 @@ func (d *Database) GetType() string {
 	return strings.ToLower(d.Type)
 }
 
+type Server struct {
+	Host string
+	Port uint64
+	ReadTimeout time.Duration
+	WriteTimeout time.Duration
+	MaxHeaderBytes int
+	//ToDo: TLS Config
+}
+
+func (s *Server) EnsureDefaults() {
+	if s.Port == 0 {
+		s.Port = 8000
+	}
+
+	if s.ReadTimeout == 0 {
+		s.ReadTimeout = 10
+	}
+
+	if s.WriteTimeout == 0 {
+		s.WriteTimeout = 10
+	}
+
+	if s.MaxHeaderBytes == 0 {
+		s.MaxHeaderBytes = 1 << 20
+	}
+}
+
+func (s *Server) Addr() string{
+	s.EnsureDefaults()
+
+	return fmt.Sprintf("%s:%d", s.Host, s.Port)
+}
+
 // Config implements configuration details.
 // File: Contains a string to the configuration file
 // Database: Contains database configuration details
 type Config struct {
 	File string `json:"-"`
 	Database Database `json:"database"`
+	Server Server `json:"webserver"`
 }
 
 // Load will load the database file into the Config instance
@@ -191,5 +233,3 @@ func (c *Config) Save() error {
 
 	return nil
 }
-
-//ToDo: Implement MongoDB
