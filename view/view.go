@@ -1,20 +1,23 @@
 package view
 
 import (
-	"github.com/BalkanTech/goilerplate/alerts"
 	"html/template"
-	"net/http"
 	"log"
+	"net/http"
+
+	"github.com/BalkanTech/goilerplate/alerts"
 )
 
-
 type View struct {
+	Title    string
 	template *template.Template
-	Data interface{}
+	layout   string
+	Data     interface{}
 }
 
 type responseData struct {
-	Data interface{}
+	Title  string
+	Data   interface{}
 	Alerts []alerts.Alert
 }
 
@@ -24,10 +27,10 @@ func (v *View) Execute(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "html")
 	w.WriteHeader(http.StatusOK)
 
-	r := responseData{v.Data, Alerts}
+	r := responseData{v.Title, v.Data, Alerts}
 	Alerts = []alerts.Alert{}
 
-	err := v.template.Execute(w, r)
+	err := v.template.ExecuteTemplate(w, v.layout, r)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -37,8 +40,8 @@ func (v *View) DefaultHandler(w http.ResponseWriter, r *http.Request) {
 	v.Execute(w)
 }
 
-func NewView(filename string) *View{
-	t := template.Must(template.ParseFiles(filename))
+func NewView(title string, layout string, files ...string) *View {
+	t := template.Must(template.ParseFiles(files...))
 	v := &View{template: t}
 	return v
 }

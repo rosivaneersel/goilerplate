@@ -1,13 +1,14 @@
 package main
 
 import (
-	"github.com/BalkanTech/goilerplate/webserver"
 	"flag"
 	"log"
-	"github.com/BalkanTech/goilerplate/view"
-	db "github.com/BalkanTech/goilerplate/databases"
+
 	cfg "github.com/BalkanTech/goilerplate/config"
+	db "github.com/BalkanTech/goilerplate/databases"
 	"github.com/BalkanTech/goilerplate/users"
+	"github.com/BalkanTech/goilerplate/view"
+	"github.com/BalkanTech/goilerplate/webserver"
 	"github.com/jinzhu/gorm"
 )
 
@@ -31,14 +32,13 @@ func main() {
 
 	router := webserver.Router
 
-	rootView := view.NewView("templates/index.html")
+	rootView := view.NewView("Goilerplate", "base", "templates/index.html", "_nav.html")
 	router.HandleFunc("/", rootView.DefaultHandler)
 
 	UserController = users.NewUserManagerGorm(DB)
 
-	loginView := view.NewView("templates/login.html")
+	loginView := view.NewView("Login", "base", "templates/index.html", "_nav.html", "templates/login.html")
 	router.HandleFunc("/login", loginView.DefaultHandler).Methods("GET")
-
 
 	router.HandleFunc("/login", LoginHandler).Methods("POST")
 	router.HandleFunc("/logout", LogoutHandler)
