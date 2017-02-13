@@ -10,9 +10,10 @@ import (
 
 type View struct {
 	Title    string
+	Data     interface{}
+	alerts  *alerts.Alerts
 	template *template.Template
 	layout   string
-	Data     interface{}
 }
 
 type responseData struct {
@@ -22,14 +23,13 @@ type responseData struct {
 }
 
 var DefaultFiles = []string{"templates/index.html", "templates/_nav.html"}
-var Alerts = []alerts.Alert{}
+//var Alerts = []alerts.Alert{}
 
-func (v *View) Execute(w http.ResponseWriter) {
+func (v *View) ExecuteTemplate(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "html")
 	w.WriteHeader(http.StatusOK)
 
-	r := responseData{v.Title, v.Data, Alerts}
-	Alerts = []alerts.Alert{}
+	r := responseData{v.Title, v.Data, v.alerts.Get()}
 
 	err := v.template.ExecuteTemplate(w, v.layout, r)
 	if err != nil {
@@ -38,12 +38,12 @@ func (v *View) Execute(w http.ResponseWriter) {
 }
 
 func (v *View) DefaultHandler(w http.ResponseWriter, r *http.Request) {
-	v.Execute(w)
+	v.ExecuteTemplate(w)
 }
 
-func NewView(title string, layout string, files ...string) *View {
+func NewView(title string, layout string, alerts *alerts.Alerts, files ...string) *View {
 	fs := append(DefaultFiles, files...)
 	t := template.Must(template.ParseFiles(fs...))
-	v := &View{template: t, layout: layout, Title: title}
+	v := &View{template: t, layout: layout, Title: title, alerts: alerts}
 	return v
 }

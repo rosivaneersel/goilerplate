@@ -1,10 +1,8 @@
-package sessions
+package users
 
 import (
 	"net/http"
-	"github.com/BalkanTech/goilerplate/users"
 	"github.com/gorilla/securecookie"
-	"github.com/BalkanTech/goilerplate/view"
 	"github.com/BalkanTech/goilerplate/alerts"
 	"log"
 )
@@ -19,7 +17,7 @@ var cookieHandler = securecookie.New(
 	securecookie.GenerateRandomKey(32),
 )
 
-func CreateSession(u *users.User, w http.ResponseWriter) {
+func CreateSession(u *User, w http.ResponseWriter) {
 	v := map[string]interface{}{
 		"id":       u.ID(),
 		"username": u.Username,
@@ -61,28 +59,28 @@ func GetUser(r *http.Request) (user ActiveUser, err error) {
 
 var RequireLoginRedirectTo string = "/login"
 
-func RequireLogin(v *view.View, users users.UserManager, next http.HandlerFunc) http.HandlerFunc {
+func RequireLogin(a *alerts.Alerts, users UserManager, next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, err := GetUser(r)
 		if err != nil {
-			view.Alerts = append(view.Alerts, alerts.Alert{Title: "Warning", Class: "warning", Message: "You need to login to access that page."})
+			a.New("Warning", "warning", "You need to login to access that page.")
 			http.Redirect(w, r, RequireLoginRedirectTo, http.StatusTemporaryRedirect)
 		}
 
 		_, err = users.GetByID(user.ID)
 		if err != nil {
-			view.Alerts = append(view.Alerts, alerts.Alert{Title: "Warning", Class: "warning", Message: "You need to login to access that page."})
+			a.New("Warning", "warning", "You need to login to access that page.")
 			http.Redirect(w, r, RequireLoginRedirectTo, http.StatusTemporaryRedirect)
 		}
 		next(w, r)
 	}
 }
 
-func RequireAdmin(v *view.View, users users.UserManager, next http.HandlerFunc) http.HandlerFunc {
+func RequireAdmin(a *alerts.Alerts, users UserManager, next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, err := GetUser(r)
 		if err != nil {
-			view.Alerts = append(view.Alerts, alerts.Alert{Title: "Warning", Class: "warning", Message: "You need to login to access that page."})
+			a.New("Warning", "warning", "You need to login to access that page.")
 			http.Redirect(w, r, RequireLoginRedirectTo, http.StatusTemporaryRedirect)
 			return
 		}

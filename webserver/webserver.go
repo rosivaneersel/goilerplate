@@ -4,27 +4,19 @@ import (
 	"github.com/BalkanTech/goilerplate/config"
 	"net/http"
 	"log"
-	"github.com/gorilla/mux"
 	"time"
 	"fmt"
+	"github.com/gorilla/mux"
 )
 
-var Router = mux.NewRouter()
-
-func Start(configFile string) error{
-	c := &config.Config{File: configFile}
-	c.Load()
-
+func Start(config *config.Config, router *mux.Router) error{
 	server := &http.Server {
-		Addr: c.Server.Addr(),
-		ReadTimeout: c.Server.ReadTimeout * time.Second,
-		WriteTimeout: c.Server.WriteTimeout * time.Second,
-		MaxHeaderBytes: c.Server.MaxHeaderBytes,
-		Handler: Router,
+		Addr: config.Server.Addr(),
+		ReadTimeout: config.Server.ReadTimeout * time.Second,
+		WriteTimeout: config.Server.WriteTimeout * time.Second,
+		MaxHeaderBytes: config.Server.MaxHeaderBytes,
+		Handler: router,
 	}
-
-	//ToDo: Set static directory via config
-	Router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
 	fmt.Println("-------------------------------------------------------------")
 	fmt.Println("| Goilerplate project v0.0.1                                |")

@@ -9,6 +9,26 @@ import (
 	"time"
 )
 
+type Static struct {
+	Path string
+	URL string
+}
+
+func (s *Static) GetPath() string {
+	if s.Path != "" {
+		if string(s.Path[len(s.Path)-1]) != "/" {
+			return s.Path + "/"
+		}
+		return s.Path
+	}
+	return "./static"
+}
+
+func (s *Static) GetURL() string {
+	if s.URL != "" { return s.URL }
+	return "/static/"
+}
+
 // Database implements database connection configuration details
 type Database struct {
 	Type string // Options: mysql, postgres, sqlite3, mongodb
@@ -155,6 +175,23 @@ func (d *Database) GetType() string {
 	return strings.ToLower(d.Type)
 }
 
+// IsGorm returns true or false whether the database type is set to use a Gorm type of database
+func (d *Database) IsGorm() bool {
+	dbtype := d.GetType()
+
+	return dbtype == "sqlite3" || dbtype == "postgres" || dbtype == "mysql"
+}
+
+// IsMGO returns true or false whether the database type is set to use a MongoDB type of database
+func (d *Database) IsMGO() bool {
+	return d.GetType() == "mongodb"
+}
+
+// IsValidType returns true if the Type is set to a valid value, false if set to a false value
+func (d *Database) IsValidType() bool {
+	return d.IsGorm() || d.IsMGO()
+}
+
 type Server struct {
 	Host string
 	Port uint64
@@ -193,8 +230,10 @@ func (s *Server) Addr() string{
 // Database: Contains database configuration details
 type Config struct {
 	File string `json:"-"`
-	Database Database `json:"database"`
-	Server Server `json:"webserver"`
+	Database Database
+	Server Server
+	Static Static
+	TemplatesPath string
 }
 
 // Load will load the database file into the Config instance
@@ -232,4 +271,14 @@ func (c *Config) Save() error {
 	}
 
 	return nil
+}
+
+func (c *Config) GetTemplatesPath() string {
+	if c.TemplatesPath != "" {
+		if string(c.TemplatesPath[len(c.TemplatesPath)-1]) != "/" {
+			return c.TemplatesPath + "/"
+		}
+		return c.TemplatesPath
+	}
+	return "templates/"
 }

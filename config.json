@@ -1,6 +1,11 @@
 {
   "Database": {
     "Type": "sqlite3",
-    "DB": "goilerplate.db"
+    "DB": "goilerplate.db",
+    "Static": {
+      "Path": "static",
+      "URL": "/static/"
+    },
+    "TemplateURL": "templates"
   }
 }
