@@ -18,6 +18,6 @@ func UserRoutes(r *mux.Router, v *users.UserViews) {
 
 	r.HandleFunc("/logout", v.LogoutHandler)
 
-	profileShowView := view.NewView("Profile", "base", nil, "profile_show.html")
+	profileShowView := view.NewView("Profile", "base", nil, "templates/profile_show.html")
 	r.HandleFunc("/profile", profileShowView.DefaultHandler)
 }
