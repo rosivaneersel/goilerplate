@@ -32,6 +32,7 @@ func (v *UserViews) CreateHandler(w http.ResponseWriter, r *http.Request) {
 	if password != password2 {
 		v.alerts.New("Error", "alert-danger", "Passwords don't match")
 		http.Redirect(w, r, "/register", http.StatusOK)
+		return
 	}
 
 	newUser := &User{Username: username, Email: email}
@@ -41,10 +42,12 @@ func (v *UserViews) CreateHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		v.alerts.New("Error", "alert-danger", err.Error())
 		http.Redirect(w, r, "/register", http.StatusOK)
+		return
 	}
 
-	v.alerts.New("Success", "alert-info", "You have successfully registered your account.")
+	v.alerts.New("Success", "alert-info", "You have successfully registered your account")
 	http.Redirect(w, r, "/", http.StatusOK)
+	return
 }
 
 func (v *UserViews) EditViewHandler(w http.ResponseWriter, r *http.Request) {
