@@ -1,21 +1,22 @@
 package users
 
 import (
-	"github.com/BalkanTech/goilerplate/view"
 	"net/http"
-	"github.com/gorilla/mux"
+
 	"github.com/BalkanTech/goilerplate/alerts"
+	"github.com/BalkanTech/goilerplate/view"
+	"github.com/gorilla/mux"
 )
 
 type UserViews struct {
-	NewView *view.View
-	EditView *view.View
-	LoginView *view.View
+	NewView     *view.View
+	EditView    *view.View
+	LoginView   *view.View
 	DisplayView *view.View
 
 	manager UserManager
-	router *mux.Router
-	alerts *alerts.Alerts
+	router  *mux.Router
+	alerts  *alerts.Alerts
 }
 
 func (v *UserViews) NewViewHandler(w http.ResponseWriter, r *http.Request) {
@@ -71,7 +72,7 @@ func (v *UserViews) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	u, err := v.manager.Authenticate(login, password, AuthByUsernameOrEmail)
 	if err != nil {
-		v.alerts.New("Error", "danger","Invalid login")
+		v.alerts.New("Error", "danger", "Invalid login")
 		http.Redirect(w, r, "/login", 302)
 		return
 	}
@@ -81,7 +82,7 @@ func (v *UserViews) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", 302)
 		return
 	}
-	v.alerts.New("Success","success", "You have succesfully logged in.")
+	v.alerts.New("Success", "success", "You have succesfully logged in.")
 	http.Redirect(w, r, "/", 302)
 	return
 }
@@ -93,10 +94,10 @@ func (v *UserViews) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func NewUserViews(manager UserManager, alerts *alerts.Alerts, templates string, new string, edit string, display string, login string) *UserViews{
+func NewUserViews(manager UserManager, alerts *alerts.Alerts, templates string, new string, edit string, display string, login string) *UserViews {
 	views := &UserViews{manager: manager, alerts: alerts}
-	views.NewView = view.NewView("Register", "base", alerts, templates + new)
-	views.LoginView = view.NewView("Login", "base", alerts, templates + login)
+	views.NewView = view.NewView("Register", "base", alerts, templates+new)
+	views.LoginView = view.NewView("Login", "base", alerts, templates+login)
 	// ToDo: Add edit + display
 
 	return views
