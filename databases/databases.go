@@ -36,7 +36,7 @@ type MongoDBConnection struct {
 	DB      *mgo.Database
 }
 
-//NewMgoConnection reads the provided config and returns an active MGO sessions or an error
+//NewMgoConnection reads the provided config and returns an active MGO session or an error
 func NewMgoConnection(c *config.Config) (*MongoDBConnection, error) {
 	if c.Database.GetType() != "mongodb" {
 		return nil, ErrNotMongoDB

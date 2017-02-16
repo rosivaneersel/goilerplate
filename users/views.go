@@ -5,6 +5,7 @@ import (
 
 	"github.com/BalkanTech/goilerplate/alerts"
 	"github.com/BalkanTech/goilerplate/view"
+	"github.com/BalkanTech/goilerplate/session"
 	"github.com/gorilla/mux"
 )
 
@@ -32,7 +33,7 @@ func (v *UserViews) CreateHandler(w http.ResponseWriter, r *http.Request) {
 
 	if password != password2 {
 		v.alerts.New("Error", "alert-danger", "Passwords don't match")
-		http.Redirect(w, r, "/register", http.StatusOK)
+		http.Redirect(w, r, "/register", http.StatusFound)
 		return
 	}
 
@@ -42,12 +43,12 @@ func (v *UserViews) CreateHandler(w http.ResponseWriter, r *http.Request) {
 	err := v.manager.Create(newUser)
 	if err != nil {
 		v.alerts.New("Error", "alert-danger", err.Error())
-		http.Redirect(w, r, "/register", http.StatusOK)
+		http.Redirect(w, r, "/register", http.StatusFound)
 		return
 	}
 
-	v.alerts.New("Success", "alert-info", "You have successfully registered your account")
-	http.Redirect(w, r, "/", http.StatusOK)
+	v.alerts.New("Success", "alert-info", "You have successfully registered your account. Please check your email to activate your account.")
+	http.Redirect(w, r, "/", http.StatusFound)
 	return
 }
 
@@ -68,29 +69,30 @@ func (v *UserViews) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("Password")
 	remember := r.FormValue("Remember")
 
-	_ = remember
+	_ = remember // Ignore remember for now
 
 	u, err := v.manager.Authenticate(login, password, AuthByUsernameOrEmail)
 	if err != nil {
-		v.alerts.New("Error", "danger", "Invalid login")
-		http.Redirect(w, r, "/login", 302)
+		v.alerts.New("Error", "alert-danger", "Invalid login")
+		http.Redirect(w, r, "/login", http.StatusFound)
 		return
 	}
-	CreateSession(u, w)
+
+	session.CreateSession(u.ID(), u.Username, w)
 	if u.ChangePassword {
-		v.alerts.New("Warning", "warning", "You need to change your password.")
-		http.Redirect(w, r, "/", 302)
+		v.alerts.New("Warning", "alert-warning", "You need to change your password.")
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	v.alerts.New("Success", "success", "You have succesfully logged in.")
-	http.Redirect(w, r, "/", 302)
+	v.alerts.New("Success", "alert-success", "You have succesfully logged in.")
+	http.Redirect(w, r, "/", http.StatusFound)
 	return
 }
 
 func (v *UserViews) LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	DestroySession(w)
-	v.alerts.New("Success", "success", "You have succesfully logged out.")
-	http.Redirect(w, r, "/", 302)
+	session.DestroySession(w)
+	v.alerts.New("Success", "alert-success", "You have succesfully logged out.")
+	http.Redirect(w, r, "/", http.StatusFound)
 	return
 }
 

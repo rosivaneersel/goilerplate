@@ -4,9 +4,10 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-
 	"github.com/BalkanTech/goilerplate/alerts"
+	"github.com/BalkanTech/goilerplate/session"
 )
+
 
 type View struct {
 	Title    string
@@ -17,28 +18,30 @@ type View struct {
 }
 
 type responseData struct {
-	Title  string
-	Data   interface{}
-	Alerts []alerts.Alert
+	Title   string
+	Data    interface{}
+	Alerts  []alerts.Alert
+	Session session.ActiveUser
 }
 
 var DefaultFiles = []string{"templates/index.html", "templates/_nav.html"}
 //var Alerts = []alerts.Alert{}
 
-func (v *View) ExecuteTemplate(w http.ResponseWriter) {
+func (v *View) ExecuteTemplate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "html")
 	w.WriteHeader(http.StatusOK)
 
-	r := responseData{v.Title, v.Data, v.alerts.Get()}
+	u, err := session.GetUser(r)
+	res := responseData{v.Title, v.Data, v.alerts.Get(), u}
 
-	err := v.template.ExecuteTemplate(w, v.layout, r)
+	err = v.template.ExecuteTemplate(w, v.layout, res)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func (v *View) DefaultHandler(w http.ResponseWriter, r *http.Request) {
-	v.ExecuteTemplate(w)
+	v.ExecuteTemplate(w, r)
 }
 
 func NewView(title string, layout string, alerts *alerts.Alerts, files ...string) *View {

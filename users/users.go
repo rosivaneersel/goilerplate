@@ -4,6 +4,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/mgo.v2/bson"
 	"time"
+	"strconv"
 )
 
 const (
@@ -29,7 +30,7 @@ type User struct {
 
 func (u *User) ID() string {
 	if u.GID != 0 {
-		return string(u.GID)
+		return strconv.FormatUint(uint64(u.GID), 10)
 	} else if u.MID.Valid() {
 		return u.MID.String()
 	}
