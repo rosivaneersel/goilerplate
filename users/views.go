@@ -23,7 +23,28 @@ func (v *UserViews) NewViewHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (v *UserViews) CreateHandler(w http.ResponseWriter, r *http.Request) {
+	//ToDo: Set endpoints via config
+	username := r.FormValue("Username")
+	password := r.FormValue("Password")
+	password2 := r.FormValue("Password2")
+	email := r.FormValue("Email")
 
+	if password != password2 {
+		v.alerts.New("Error", "alert-danger", "Passwords don't match")
+		http.Redirect(w, r, "/register", http.StatusOK)
+	}
+
+	newUser := &User{Username: username, Email: email}
+	newUser.SetPassword(password)
+
+	err := v.manager.Create(newUser)
+	if err != nil {
+		v.alerts.New("Error", "alert-danger", err.Error())
+		http.Redirect(w, r, "/register", http.StatusOK)
+	}
+
+	v.alerts.New("Success", "alert-info", "You have successfully registered your account.")
+	http.Redirect(w, r, "/", http.StatusOK)
 }
 
 func (v *UserViews) EditViewHandler(w http.ResponseWriter, r *http.Request) {
