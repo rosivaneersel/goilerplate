@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/BalkanTech/goilerplate/users"
 	"github.com/gorilla/mux"
+	"github.com/BalkanTech/goilerplate/view"
 )
 
 func UserRoutes(r *mux.Router, v *users.UserViews) {
@@ -16,4 +17,7 @@ func UserRoutes(r *mux.Router, v *users.UserViews) {
 	r.HandleFunc("/login", v.LoginView.DefaultHandler)
 
 	r.HandleFunc("/logout", v.LogoutHandler)
+
+	profileShowView := view.NewView("Profile", "base", nil, "profile_show.html")
+	r.HandleFunc("/profile", profileShowView.DefaultHandler)
 }
