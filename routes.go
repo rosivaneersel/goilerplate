@@ -6,12 +6,14 @@ import (
 )
 
 func UserRoutes(r *mux.Router, v *users.UserViews) {
-	r.HandleFunc("/register", v.NewView.DefaultHandler)
 	r.HandleFunc("/register", v.CreateHandler).Methods("POST")
+	r.HandleFunc("/register", v.NewView.DefaultHandler)
+
 	// ToDo: edit
 	// ToDo: display
 	// ToDo: delete
-	r.HandleFunc("/login", v.LoginView.DefaultHandler)
 	r.HandleFunc("/login", v.LoginHandler).Methods("POST")
+	r.HandleFunc("/login", v.LoginView.DefaultHandler)
+
 	r.HandleFunc("/logout", v.LogoutHandler)
 }
