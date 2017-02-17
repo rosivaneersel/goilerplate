@@ -24,5 +24,5 @@ func UserRoutes(r *mux.Router, v *users.UserViews) {
 	a := &alerts.Alerts{}
 
 	profileShowView := view.NewView("Profile", "base", a, "templates/profile_show.html")
-	r.HandleFunc("/profile", profileShowView.DefaultHandler)
+	r.HandleFunc("/account", profileShowView.DefaultHandler)
 }
