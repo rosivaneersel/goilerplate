@@ -2,32 +2,35 @@
     <div class="row">
       <div class="panel panel-primary col-xs-12 col-md-4 col-md-offset-4">
         <div class="panel-body">
-          <form action="/change_password" method="post">
+          <form action="/register" method="post">
             <div class="text-center text-primary form-icon">
               <i class="fa fa-user-circle fa-5x"></i>
             </div>
 
-            <div class="input-group">
-              <span class="input-group-addon" id="password"><i class="fa fa-key fa-fw"></i></span>
-              <input class="form-control" type="password" placeholder="Password" aria-describedby="password" name="Password">
-            </div>
-            <div class="input-group">
-              <span class="input-group-addon" id="new_password"><i class="fa fa-key fa-fw"></i></span>
-              <input class="form-control" type="password" placeholder="New password" aria-describedby="new_password" name="NewPassword">
+            <div class="input-group margin-bottom-sm">
+              <span class="input-group-addon" id="first_name"><i class="fa fa-male fa-fw"></i></span>
+              <input class="form-control" type="text" placeholder="First name" aria-describedby="first_name" value="{{ .User.Profile.FirstName }}" name="FirstName">
             </div>
 
-            <div class="input-group">
-              <span class="input-group-addon" id="new_password2"><i class="fa fa-key fa-fw"></i></span>
-              <input class="form-control" type="password" placeholder="Confirm new password" aria-describedby="new_password2" name="NewPassword2">
+            <div class="input-group margin-bottom-sm">
+              <span class="input-group-addon" id="last_name"><i class="fa fa-male fa-fw"></i></span>
+              <input class="form-control" type="text" placeholder="Lastname" aria-describedby="last_name" value="{{ .User.Profile.LastName }}" name="LastName">
             </div>
 
-            <button type="submit" class="btn btn-primary btn-sm pull-right"><i class="fa fa-floppy-o" aria-hidden="true"></i> Change</button>
+            <div class="input-group margin-bottom-sm">
+              <span class="input-group-addon" id="username"><i class="fa fa-user-circle-o fa-fw"></i></span>
+              <input class="form-control" type="text" placeholder="Username" aria-describedby="username" value="{{ .User.Username }}"name="Username">
+            </div>
+
+            <div class="input-group margin-bottom-sm">
+              <span class="input-group-addon" id="email"><i class="fa fa-envelope-o fa-fw"></i></span>
+              <input class="form-control" type="text" placeholder="Email address" aria-describedby="email" value="{{ .User.Email }}"name="Email">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-sm pull-right"><i class="fa fa-floppy-o" aria-hidden="true"></i> Update</button>
 
           </form>
         </div>
       </div>
-      <div class="col-xs-12 text-center">
-        <a href="#">Forgot password</a>
-      </div>
     </div>
-{{end}}
+    {{ end }}
