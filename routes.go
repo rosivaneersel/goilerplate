@@ -3,8 +3,6 @@ package main
 import (
 	"github.com/BalkanTech/goilerplate/users"
 	"github.com/gorilla/mux"
-	"github.com/BalkanTech/goilerplate/view"
-	"github.com/BalkanTech/goilerplate/alerts"
 )
 
 func UserRoutes(r *mux.Router, v *users.UserViews) {
@@ -18,11 +16,11 @@ func UserRoutes(r *mux.Router, v *users.UserViews) {
 
 	r.HandleFunc("/logout", v.LogoutHandler)
 
-	r.HandleFunc("/change_password", v.UpdateHandler).Methods("POST")
-	r.HandleFunc("/change_password", v.EditView.DefaultHandler)
+	r.HandleFunc("/change_password", v.ChangePasswordHandler).Methods("POST")
+	r.HandleFunc("/change_password", v.ChangePasswordView.DefaultHandler)
 
-	a := &alerts.Alerts{}
+	r.HandleFunc("/account", v.DisplayViewHandler)
 
-	profileShowView := view.NewView("Profile", "base", a, "templates/profile_show.html")
-	r.HandleFunc("/account", profileShowView.DefaultHandler)
+	r.HandleFunc("/account/edit", v.UpdateHandler).Methods("POST")
+	r.HandleFunc("/account/edit", v.EditViewHandler)
 }

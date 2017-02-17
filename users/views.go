@@ -12,6 +12,7 @@ import (
 type UserViews struct {
 	NewView     *view.View
 	EditView    *view.View
+	ChangePasswordView    *view.View
 	LoginView   *view.View
 	DisplayView *view.View
 
@@ -53,10 +54,38 @@ func (v *UserViews) CreateHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (v *UserViews) EditViewHandler(w http.ResponseWriter, r *http.Request) {
+	a, _ := session.GetUser(r)
 
+	u, err := v.manager.GetByID(a.ID)
+	if err != nil {
+		v.alerts.New("Error", "alert-danger", err.Error())
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
+	v.EditView.Data = map [string]interface{}{"User": u}
+	v.EditView.ExecuteTemplate(w, r)
 }
 
 func (v *UserViews) UpdateHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (v *UserViews) DisplayViewHandler(w http.ResponseWriter, r *http.Request) {
+	a, _ := session.GetUser(r)
+
+	u, err := v.manager.GetByID(a.ID)
+	if err != nil {
+		v.alerts.New("Error", "alert-danger", err.Error())
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
+	v.DisplayView.Data = map [string]interface{}{"User": u}
+	v.DisplayView.ExecuteTemplate(w, r)
+}
+
+func (v *UserViews) ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
 	u, _ := session.GetUser(r)
 	password := r.FormValue("Password")
 	newpassword := r.FormValue("NewPassword")
@@ -120,11 +149,13 @@ func (v *UserViews) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func NewUserViews(manager UserManager, alerts *alerts.Alerts, templates string, new string, edit string, display string, login string) *UserViews {
+func NewUserViews(manager UserManager, alerts *alerts.Alerts, templates string, new string, edit string, display string, login string, changepw string) *UserViews {
 	views := &UserViews{manager: manager, alerts: alerts}
 	views.NewView = view.NewView("Register", "base", alerts, templates+new)
+	views.EditView = view.NewView("Edit", "base", alerts, templates+edit)
 	views.LoginView = view.NewView("Login", "base", alerts, templates+login)
-	views.EditView = view.NewView("Change password", "base", alerts, templates+edit)
+	views.ChangePasswordView = view.NewView("Change password", "base", alerts, templates+changepw)
+	views.DisplayView = view.NewView("Account", "base", alerts, templates+display)
 	// ToDo: Add edit + display
 
 	return views

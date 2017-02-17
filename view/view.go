@@ -11,7 +11,7 @@ import (
 
 type View struct {
 	Title    string
-	Data     interface{}
+	Data     map[string]interface{}
 	alerts  *alerts.Alerts
 	template *template.Template
 	layout   string
@@ -19,13 +19,12 @@ type View struct {
 
 type responseData struct {
 	Title   string
-	Data    interface{}
+	Data    map[string]interface{}
 	Alerts  []alerts.Alert
 	Session session.ActiveUser
 }
 
 var DefaultFiles = []string{"templates/index.html", "templates/_nav.html"}
-//var Alerts = []alerts.Alert{}
 
 func (v *View) ExecuteTemplate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "html")

@@ -10,7 +10,6 @@ import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"strconv"
-	"log"
 )
 
 // UserGorm is the GORM database connector of the User model
