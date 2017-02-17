@@ -7,6 +7,7 @@ import (
 	"github.com/BalkanTech/goilerplate/view"
 	"github.com/BalkanTech/goilerplate/session"
 	"github.com/gorilla/mux"
+	"log"
 )
 
 type UserViews struct {

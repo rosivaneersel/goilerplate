@@ -18,7 +18,7 @@ func UserRoutes(r *mux.Router, v *users.UserViews) {
 
 	r.HandleFunc("/logout", v.LogoutHandler)
 
-	r.HandleFunc("/change_password", v.EditViewHandler).Methods("POST")
+	r.HandleFunc("/change_password", v.UpdateHandler).Methods("POST")
 	r.HandleFunc("/change_password", v.EditView.DefaultHandler)
 
 	a := &alerts.Alerts{}
