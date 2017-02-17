@@ -43,3 +43,6 @@ body {
 .input-group {
   margin-bottom: 5px;
 }
+.profile-image {
+  height: 90px;
+}

@@ -1,0 +1,33 @@
+{{define "content"}}
+    <div class="row">
+      <div class="panel panel-primary col-xs-12 col-md-4 col-md-offset-4">
+        <div class="panel-body">
+          <form action="/change_password" method="post">
+            <div class="text-center text-primary form-icon">
+              <i class="fa fa-user-circle fa-5x"></i>
+            </div>
+
+            <div class="input-group">
+              <span class="input-group-addon" id="password"><i class="fa fa-key fa-fw"></i></span>
+              <input class="form-control" type="password" placeholder="Password" aria-describedby="password" name="Password">
+            </div>
+            <div class="input-group">
+              <span class="input-group-addon" id="new_password"><i class="fa fa-key fa-fw"></i></span>
+              <input class="form-control" type="password" placeholder="New password" aria-describedby="new_password" name="NewPassword">
+            </div>
+
+            <div class="input-group">
+              <span class="input-group-addon" id="new_password2"><i class="fa fa-key fa-fw"></i></span>
+              <input class="form-control" type="password" placeholder="Confirm new password" aria-describedby="new_password2" name="NewPassword2">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-sm pull-right"><i class="fa fa-floppy-o" aria-hidden="true"></i> Change</button>
+
+          </form>
+        </div>
+      </div>
+      <div class="col-xs-12 text-center">
+        <a href="#">Forgot password</a>
+      </div>
+    </div>
+{{end}}
