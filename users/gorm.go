@@ -10,6 +10,7 @@ import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"strconv"
+	"log"
 )
 
 // UserGorm is the GORM database connector of the User model
@@ -26,7 +27,7 @@ func (o *UserGorm) Init(drop bool) error {
 			return err
 		}
 	}
-	err := o.DB.AutoMigrate(&User{}).Error
+	err := o.DB.AutoMigrate(&User{}, &Profile{}).Error
 	if err != nil {
 		return err
 	}
@@ -49,6 +50,8 @@ func (o *UserGorm) GetByID(id string) (*User, error) {
 
 	err = o.DB.Where("id = ?", gid).First(user).Error
 
+	o.DB.Model(user).Related(&user.Profile)
+
 	return user, err
 }
 
@@ -58,6 +61,8 @@ func (o *UserGorm) GetByEmail(email string) (*User, error) {
 	user := &User{}
 	err := o.DB.Where("email = ?", email).First(user).Error
 
+	o.DB.Model(user).Related(&user.Profile)
+
 	return user, err
 }
 
@@ -66,6 +71,8 @@ func (o *UserGorm) GetByEmail(email string) (*User, error) {
 func (o *UserGorm) Get(query interface{}, values ...interface{}) (*User, error) {
 	user := &User{}
 	err := o.DB.Where(query, values...).First(user).Error
+
+	o.DB.Model(user).Related(&user.Profile)
 
 	return user, err
 }
@@ -106,6 +113,8 @@ func (o *UserGorm) Authenticate(user string, password string, authBy uint) (*Use
 		err = errors.New("Invalid authBy value")
 	}
 
+	o.DB.Model(u).Related(&u.Profile)
+
 	if err != nil {
 		return nil, err
 	}
@@ -120,11 +129,13 @@ func (o *UserGorm) Authenticate(user string, password string, authBy uint) (*Use
 
 // Create will create a new record in the database for the provided user or return an error
 func (o *UserGorm) Create(u *User) error {
-	//time := time.Now()
-
-	//u.CreatedAt = time
-	//u.UpdatedAt = time
 	err := o.DB.Create(u).Error
+	if err != nil {
+		return err
+	}
+
+	p := &Profile{UserID: u.GID}
+	err = o.DB.Create(p).Error
 	if err != nil {
 		return err
 	}

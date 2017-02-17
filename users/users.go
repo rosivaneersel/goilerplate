@@ -23,6 +23,7 @@ type User struct {
 	Password  string
 	ChangePassword bool
 	IsAdmin bool
+	Profile Profile
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt *time.Time
