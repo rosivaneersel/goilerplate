@@ -91,10 +91,13 @@ func (o *UserMgo) Authenticate(user string, password string, authBy uint) (*User
 	}
 
 	if err != nil {
-		return u, err
+		return nil, err
 	}
 
 	err = o.compareHashAndPassword(u.Password, password)
+	if err != nil {
+		return nil, err
+	}
 
 	return u, nil
 }
