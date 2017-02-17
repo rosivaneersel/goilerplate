@@ -65,14 +65,14 @@ func (v *UserViews) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 	if newpassword != newpassword2 {
 		v.alerts.New("Error", "alert-danger", "New password and confirmation don't match")
 		//ToDo: Set change password URL via config
-		http.Redirect(w, r, "/changepassword", http.StatusFound)
+		http.Redirect(w, r, "/change_password", http.StatusFound)
 		return
 	}
 
 	user, err := v.manager.Authenticate(u.Username, password, AuthByUsername)
 	if err != nil {
 		v.alerts.New("Error", "alert-danger", "Invalid password")
-		http.Redirect(w, r, "/changepassword", http.StatusFound)
+		http.Redirect(w, r, "/change_password", http.StatusFound)
 		return
 	}
 
