@@ -57,7 +57,31 @@ func (v *UserViews) EditViewHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (v *UserViews) UpdateHandler(w http.ResponseWriter, r *http.Request) {
+	u, _ := session.GetUser(r)
+	password := r.FormValue("Password")
+	newpassword := r.FormValue("NewPassword")
+	newpassword2 := r.FormValue("NewPassword2")
 
+	if newpassword != newpassword2 {
+		v.alerts.New("Error", "alert-danger", "New password and confirmation don't match")
+		//ToDo: Set change password URL via config
+		http.Redirect(w, r, "/changepassword", http.StatusFound)
+		return
+	}
+
+	user, err := v.manager.Authenticate(u.Username, password, AuthByUsername)
+	if err != nil {
+		v.alerts.New("Error", "alert-danger", "Invalid password")
+		http.Redirect(w, r, "/changepassword", http.StatusFound)
+		return
+	}
+
+	user.SetPassword(newpassword)
+	session.DestroySession(w)
+	v.manager.Update(user)
+	v.alerts.New("Success", "alert-success", "Your password has been updated. Please login again with your new password.")
+	http.Redirect(w, r, "/login", http.StatusFound)
+	return
 }
 
 func (v *UserViews) LoginViewHandler(w http.ResponseWriter, r *http.Request) {
@@ -100,6 +124,7 @@ func NewUserViews(manager UserManager, alerts *alerts.Alerts, templates string, 
 	views := &UserViews{manager: manager, alerts: alerts}
 	views.NewView = view.NewView("Register", "base", alerts, templates+new)
 	views.LoginView = view.NewView("Login", "base", alerts, templates+login)
+	views.EditView = view.NewView("Change password", "base", alerts, templates+edit)
 	// ToDo: Add edit + display
 
 	return views
