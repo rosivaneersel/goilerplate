@@ -53,5 +53,5 @@ func GetUser(r *http.Request) (user ActiveUser, err error) {
 	if err = cookieHandler.Decode("session", c.Value, &cValue); err != nil {
 		return user, err
 	}
-	return ActiveUser{ID: cValue["id"].(string), Username: cValue["username"].(string), EmailMD5: cValue["emailmd5"].(string)}, nil
+	return ActiveUser{ID: cValue["id"].(string), Username: cValue["username"].(string)}, nil
 }

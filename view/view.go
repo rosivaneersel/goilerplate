@@ -9,7 +9,6 @@ import (
 	"github.com/gorilla/csrf"
 )
 
-
 type View struct {
 	Title    string
 	Data     map[string]interface{}
