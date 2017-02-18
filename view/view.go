@@ -23,7 +23,7 @@ type responseData struct {
 	Data    map[string]interface{}
 	Alerts  []alerts.Alert
 	Session session.ActiveUser
-	csrfField  template.HTML
+	CsrfField  template.HTML
 }
 
 var DefaultFiles = []string{"templates/index.html", "templates/_nav.html"}
