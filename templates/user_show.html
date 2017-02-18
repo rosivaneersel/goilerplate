@@ -4,26 +4,26 @@
 
     <div class="panel panel-primary">
       <div class="panel-body">
-        <img src="http://placehold.it/500x500" alt="Profile image" class="img-circle img-responsive center-block profile-image">
+        <img src="{{ .Data.User.GetAvatarURL }}" alt="Profile image" class="img-circle img-responsive center-block profile-image">
         <div class="text-center">
-          <h4>Rositsa van Eersel</h4>
+          <h4>{{ .Data.User.Profile.FirstName }} {{ .Data.User.Profile.LastName }}</h4>
         </div>
       </div>
 
       <table class="table table-hover">
         <tr>
           <th class="text-center text-primary"><i class="fa fa-user-circle-o fa-fw"></i></th>
-          <td>Rosi</td>
+          <td>{{ .Data.User.Username }}</td>
         </tr>
         <tr>
           <th class="text-center text-primary"><i class="fa fa-envelope-o fa-fw"></i></th>
-          <td>rosi@balkan.tech</td>
+          <td>{{ .Data.User.Email }}</td>
         </tr>
       </table>
 
       <div class="panel-body">
         <div class="pull-right text-right">
-            <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square" aria-hidden="true"></i> Edit</button>
+            <a href="/account/edit" class="btn btn-primary btn-sm"><i class="fa fa-pencil-square" aria-hidden="true"></i> Edit</a>
             <a href="/change_password" class="btn btn-primary btn-sm"><i class="fa fa-key" aria-hidden="true"></i> Change password</a>
         </div>
       </div>
