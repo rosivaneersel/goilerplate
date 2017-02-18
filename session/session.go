@@ -8,7 +8,6 @@ import (
 type ActiveUser struct {
 	ID       string
 	Username string
-	EmailMD5 string
 }
 
 var cookieHandler = securecookie.New(

@@ -26,7 +26,7 @@ type User struct {
 
 	Username  string
 	Email     string
-	emailMD5 string
+	EmailMD5 string
 	Password  string
 	ChangePassword bool
 	IsAdmin bool
@@ -54,7 +54,7 @@ func (u *User) setEmailMD5() error {
 
 	h := md5.New()
 	io.WriteString(h, strings.ToLower(u.Email))
-	u.emailMD5 = hex.EncodeToString(h.Sum(nil))
+	u.EmailMD5 = hex.EncodeToString(h.Sum(nil))
 	return nil
 }
 
@@ -78,7 +78,7 @@ func (u *User) GetAvatarURL() string {
 		return u.Profile.AvatarURL
 	}
 	// Else use gravatar
-	return fmt.Sprintf("//www.gravatar.com/avatar/%s", u.emailMD5)
+	return fmt.Sprintf("//www.gravatar.com/avatar/%s", u.EmailMD5)
 }
 
 // UserManager is an interface for database connectors which provide the interaction between the model and the database
