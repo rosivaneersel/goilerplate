@@ -85,29 +85,31 @@ func (v *UserViews) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 	// Update avatar
 	// Get file data from form
 	file, header, err := r.FormFile("AvatarFile")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	if err != http.ErrMissingFile {
+		if err != nil && err != http.ErrMissingFile{
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-	// Read the file
-	data, err := ioutil.ReadAll(file)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+		// Read the file
+		data, err := ioutil.ReadAll(file)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-	//ToDo: Get static path/URL from config
-	// Store the file
-	filename := path.Join("static/avatars", userID + path.Ext(header.Filename))
-	err = ioutil.WriteFile(filename, data, 0777)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+		//ToDo: Get static path/URL from config
+		// Store the file
+		filename := path.Join("static/avatars", userID+path.Ext(header.Filename))
+		err = ioutil.WriteFile(filename, data, 0777)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-	// Update Profile.AvatarURL
-	u.Profile.AvatarURL = "static/avatars/" + userID + header.Filename
+		// Update Profile.AvatarURL
+		u.Profile.AvatarURL = "static/avatars/" + userID + header.Filename
+	}
 
 	v.Manager.Update(u)
 }
