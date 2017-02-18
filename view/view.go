@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"github.com/BalkanTech/goilerplate/alerts"
 	"github.com/BalkanTech/goilerplate/session"
+	"github.com/gorilla/csrf"
 )
 
 
@@ -22,6 +23,7 @@ type responseData struct {
 	Data    map[string]interface{}
 	Alerts  []alerts.Alert
 	Session session.ActiveUser
+	csrfField  template.HTML
 }
 
 var DefaultFiles = []string{"templates/index.html", "templates/_nav.html"}
@@ -31,7 +33,7 @@ func (v *View) ExecuteTemplate(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	u, err := session.GetUser(r)
-	res := responseData{v.Title, v.Data, v.alerts.Get(), u}
+	res := responseData{v.Title, v.Data, v.alerts.Get(), u, csrf.TemplateField(r)}
 
 	err = v.template.ExecuteTemplate(w, v.layout, res)
 	if err != nil {

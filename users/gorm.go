@@ -128,6 +128,7 @@ func (o *UserGorm) Authenticate(user string, password string, authBy uint) (*Use
 
 // Create will create a new record in the database for the provided user or return an error
 func (o *UserGorm) Create(u *User) error {
+	u.setEmailMD5()
 	err := o.DB.Create(u).Error
 	if err != nil {
 		return err
@@ -144,7 +145,7 @@ func (o *UserGorm) Create(u *User) error {
 
 // Update will update the provided record in the database or return an error
 func (o *UserGorm) Update(u *User) error {
-	//u.UpdatedAt = time.Now()
+	u.setEmailMD5()
 	err := o.DB.Save(u).Error
 	if err != nil {
 		return err

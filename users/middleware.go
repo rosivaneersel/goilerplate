@@ -8,19 +8,15 @@ import (
 
 var RequireLoginRedirectTo string = "/login"
 
-func RequireLogin(a *alerts.Alerts, users UserManager, next http.HandlerFunc) http.HandlerFunc {
+func RequireLogin(a *alerts.Alerts, next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		_, err := session.GetUser(r)
 		if err != nil {
-			a.New("Warning", "warning", "You need to login to access that page.")
+			a.New("Warning", "alert-warning", "You need to login to access that page.")
 			http.Redirect(w, r, RequireLoginRedirectTo, http.StatusTemporaryRedirect)
+			return
 		}
 
-		/*_, err = users.GetByID(user.ID)
-		if err != nil {
-			a.New("Warning", "warning", "You need to login to access that page.")
-			http.Redirect(w, r, RequireLoginRedirectTo, http.StatusTemporaryRedirect)
-		}*/
 		next(w, r)
 	}
 }

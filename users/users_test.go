@@ -502,3 +502,30 @@ func TestDelete(t *testing.T) {
 		t.Log("\tExpected to be able to delete. ", testOK)
 	}
 }
+
+func TestUser_GetAvatarURL(t *testing.T) {
+	u := &User{Email: "MyEmailAddress@example.com"}
+	u.setEmailMD5()
+
+	t.Log("Testing User.GetAvatarURL without a profile AvatarURL")
+	{
+		expected := "//www.gravatar.com/avatar/0bc83cb571cd1c50ba6f3e8a78ef1346"
+		response := u.GetAvatarURL()
+		if response != expected {
+			t.Fatalf("\tExpected response \"%s\", but got \"%s\". %v", expected, response, testFailed)
+		}
+		t.Logf("\tExpected response \"%s\". %v", expected, testOK)
+	}
+
+	t.Log("Testing User.GetAvatarURL with a profile AvatarURL")
+	{
+		u.Profile = Profile{AvatarURL: "http://example.com/test.png"}
+		expected := "http://example.com/test.png"
+
+		response := u.GetAvatarURL()
+		if response != expected {
+			t.Fatalf("\tExpected response \"%s\", but got \"%s\". %v", expected, response, testFailed)
+		}
+		t.Logf("\tExpected response \"%s\". %v", expected, testOK)
+	}
+}

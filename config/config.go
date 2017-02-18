@@ -7,6 +7,7 @@ import (
 	"strings"
 	"gopkg.in/mgo.v2"
 	"time"
+	"log"
 )
 
 type Static struct {
@@ -234,6 +235,9 @@ type Config struct {
 	Server Server
 	Static Static
 	TemplatesPath string
+	Debug bool
+	Pepper string
+	CSRF string
 }
 
 // Load will load the database file into the Config instance
@@ -281,4 +285,18 @@ func (c *Config) GetTemplatesPath() string {
 		return c.TemplatesPath
 	}
 	return "templates/"
+}
+
+func (c *Config) GetCSRF() string {
+	if c.CSRF == "" {
+		log.Fatal("Config has no CSRF value")
+	}
+	return c.CSRF
+}
+
+func (c *Config) GetPepper() string {
+	if c.CSRF == "" {
+		log.Fatal("Config has no Pepper value")
+	}
+	return c.Pepper
 }

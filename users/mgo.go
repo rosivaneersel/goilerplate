@@ -108,9 +108,12 @@ func (o *UserMgo) Create(u *User) error {
 
 	u.CreatedAt = time
 	u.UpdatedAt = time
+	u.setEmailMD5()
+
 	if !u.MID.Valid() {
 		u.MID = bson.NewObjectId()
 	}
+
 	err := o.C.Insert(u)
 	if err != nil {
 		return err
@@ -122,6 +125,8 @@ func (o *UserMgo) Create(u *User) error {
 // Update will update the provided record in the database or return an error
 func (o *UserMgo) Update(u *User) error {
 	u.UpdatedAt = time.Now()
+	u.setEmailMD5()
+
 	err := o.C.Update(bson.M{"_id": u.MID}, u)
 	if err != nil {
 		return err

@@ -1,11 +1,14 @@
 {
+  "Debug": true,
+  "Pepper":       "t44etetETRTY%$t09iyt0)yi0945yU84584Y84595909iRg5p54)",
+  "CSRF":         "re4544t5y6htrrt5yu7ik86kjsherge5tyu76e56tergre",
+  "TemplateURL": "templates",
   "Database": {
     "Type": "sqlite3",
     "DB": "goilerplate.db",
     "Static": {
       "Path": "static",
       "URL": "/static/"
-    },
-    "TemplateURL": "templates"
+    }
   }
 }

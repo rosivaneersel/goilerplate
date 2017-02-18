@@ -5,6 +5,12 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"time"
 	"strconv"
+	"crypto/md5"
+	"io"
+	"strings"
+	"errors"
+	"encoding/hex"
+	"fmt"
 )
 
 const (
@@ -20,6 +26,7 @@ type User struct {
 
 	Username  string
 	Email     string
+	emailMD5 string
 	Password  string
 	ChangePassword bool
 	IsAdmin bool
@@ -39,7 +46,19 @@ func (u *User) ID() string {
 	return ""
 }
 
-//SetPassword hashes the given password and stores it into the User instance
+// EmailMD5 sets the MD5 hash of the email address
+func (u *User) setEmailMD5() error {
+	if u.Email == "" {
+		return errors.New("Email address is empty")
+	}
+
+	h := md5.New()
+	io.WriteString(h, strings.ToLower(u.Email))
+	u.emailMD5 = hex.EncodeToString(h.Sum(nil))
+	return nil
+}
+
+// SetPassword hashes the given password and stores it into the User instance
 func (u *User) SetPassword(password string) error {
 	p := []byte(password)
 
@@ -50,6 +69,16 @@ func (u *User) SetPassword(password string) error {
 
 	u.Password = string(h)
 	return nil
+}
+
+// GetAvatarURL returns the URL to the avatar image
+func (u *User) GetAvatarURL() string {
+	// If the profile has a valid AvatarURL return the value
+	if u.Profile.AvatarURL != "" {
+		return u.Profile.AvatarURL
+	}
+	// Else use gravatar
+	return fmt.Sprintf("//www.gravatar.com/avatar/%s", u.emailMD5)
 }
 
 // UserManager is an interface for database connectors which provide the interaction between the model and the database
