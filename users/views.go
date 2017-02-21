@@ -8,6 +8,7 @@ import (
 	"github.com/BalkanTech/goilerplate/session"
 	"github.com/gorilla/mux"
 	"io/ioutil"
+
 	"path"
 )
 
@@ -28,6 +29,8 @@ func (v *UserViews) CreateHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.FormValue("Username")
 	password := r.FormValue("Password")
 	password2 := r.FormValue("Password2")
+	firstName := r.FormValue("FirstName")
+	lastName := r.FormValue("LastName")
 	email := r.FormValue("Email")
 
 	if password != password2 {
@@ -37,6 +40,8 @@ func (v *UserViews) CreateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newUser := &User{Username: username, Email: email}
+	newUser.Profile.FirstName = firstName
+	newUser.Profile.LastName = lastName
 	newUser.SetPassword(password)
 
 	err := v.Manager.Create(newUser)
@@ -74,7 +79,9 @@ func (v *UserViews) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 
 	u, err := v.Manager.GetByID(userID)
 	if err != nil {
-
+		v.Alerts.New("Error", "alert-danger", err.Error())
+		http.Redirect(w, r, "/account/edit", http.StatusFound)
+		return
 	}
 
 	u.Email = email
@@ -99,6 +106,7 @@ func (v *UserViews) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		//ToDo: Get static path/URL from config
+		//ToDo: Crop image to 500x500 pixelsgo
 		// Store the file
 		filename := path.Join("static/avatars", userID+path.Ext(header.Filename))
 		err = ioutil.WriteFile(filename, data, 0777)
@@ -108,10 +116,19 @@ func (v *UserViews) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Update Profile.AvatarURL
-		u.Profile.AvatarURL = "static/avatars/" + userID + header.Filename
+		u.Profile.AvatarURL = "static/avatars/" + userID+path.Ext(header.Filename)
 	}
 
-	v.Manager.Update(u)
+	err = v.Manager.Update(u)
+	if err != nil {
+		v.Alerts.New("Error", "alert-danger", err.Error())
+		http.Redirect(w, r, "/account/edit", http.StatusFound)
+		return
+	}
+	v.Alerts.New("Success", "alert-success", "Your profile has been updated successfully")
+	http.Redirect(w, r, "/account", http.StatusFound)
+	return
+
 }
 
 func (v *UserViews) DisplayViewHandler(w http.ResponseWriter, r *http.Request) {

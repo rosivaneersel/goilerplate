@@ -27,7 +27,11 @@ func NewGormConnection(c *config.Config) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	return gorm.Open(c.Database.GetType(), s)
+	db, err := gorm.Open(c.Database.GetType(), s)
+	if c.Debug {
+		db.LogMode(true)
+	}
+	return db, err
 
 }
 

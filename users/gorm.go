@@ -10,6 +10,7 @@ import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"strconv"
+	"log"
 )
 
 // UserGorm is the GORM database connector of the User model
@@ -39,30 +40,34 @@ func (o *UserGorm) GetByID(id string) (*User, error) {
 	user := &User{}
 
 	if id == "" {
-		return user, errors.New("Empty ID")
+		return nil, errors.New("Empty ID")
 	}
 
 	gid, err := strconv.ParseUint(id, 10, 32)
 	if err != nil {
-		return user, err
+		return nil, err
 	}
 
 	err = o.DB.Where("id = ?", gid).First(user).Error
-
-	o.DB.Model(user).Related(&user.Profile)
-
-	return user, err
+	if err != nil {
+		return nil, err
+	}
+	o.DB.Model(user).Related(&user.Profile, "Profile")
+	return user, nil
 }
 
 //GetByEmail queries the database for a User instance by email
 // Returns *User and and error
 func (o *UserGorm) GetByEmail(email string) (*User, error) {
 	user := &User{}
+
 	err := o.DB.Where("email = ?", email).First(user).Error
+	if err != nil {
+		return nil, err
+	}
+	o.DB.Model(user).Related(&user.Profile, "Profile")
 
-	o.DB.Model(user).Related(&user.Profile)
-
-	return user, err
+	return user, nil
 }
 
 //Get queries the database via the provided query
@@ -70,19 +75,24 @@ func (o *UserGorm) GetByEmail(email string) (*User, error) {
 func (o *UserGorm) Get(query interface{}, values ...interface{}) (*User, error) {
 	user := &User{}
 	err := o.DB.Where(query, values...).First(user).Error
+	if err != nil {
+		return nil, err
+	}
+	o.DB.Model(user).Related(&user.Profile, "Profile")
 
-	o.DB.Model(user).Related(&user.Profile)
-
-	return user, err
+	return user, nil
 }
 
 // Find queries the database via the provided query
 // Returns a slice of User and and error
 func (o *UserGorm) Find(query interface{}, values ...interface{}) (*[]User, error) {
 	users := &[]User{}
-	err := o.DB.Where(query, values...).Find(users).Error
+	err := o.DB.Preload("Profile").Where(query, values...).Find(users).Error
+	if err != nil {
+		return nil, err
+	}
 
-	return users, err
+	return users, nil
 }
 
 func (o *UserGorm) compareHashAndPassword(password1 string, password2 string) error {
@@ -112,8 +122,6 @@ func (o *UserGorm) Authenticate(user string, password string, authBy uint) (*Use
 		err = errors.New("Invalid authBy value")
 	}
 
-	o.DB.Model(u).Related(&u.Profile)
-
 	if err != nil {
 		return nil, err
 	}
@@ -122,6 +130,7 @@ func (o *UserGorm) Authenticate(user string, password string, authBy uint) (*Use
 	if err != nil {
 		return nil, err
 	}
+	o.DB.Model(user).Related(&u.Profile, "Profile")
 
 	return u, nil
 }
@@ -129,13 +138,8 @@ func (o *UserGorm) Authenticate(user string, password string, authBy uint) (*Use
 // Create will create a new record in the database for the provided user or return an error
 func (o *UserGorm) Create(u *User) error {
 	u.setEmailMD5()
+	log.Printf("%+v", *u)
 	err := o.DB.Create(u).Error
-	if err != nil {
-		return err
-	}
-
-	p := &Profile{UserID: u.GID}
-	err = o.DB.Create(p).Error
 	if err != nil {
 		return err
 	}

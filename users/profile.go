@@ -6,7 +6,7 @@ import (
 
 type Profile struct {
 	GID uint          `gorm:"column:id; primary_key" bson:"-"`
-	UserID   uint	`bson:"-"`
+	UserGID   uint	`bson:"-"`
 	FirstName string
 	LastName string
 	AvatarURL string

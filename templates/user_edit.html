@@ -3,6 +3,8 @@
       <div class="panel panel-primary col-xs-12 col-md-4 col-md-offset-4">
         <div class="panel-body">
           <form action="/account/edit" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="UserID" value="{{ .Data.User.ID }}">
+
             <div class="text-center text-primary form-icon">
               <img src="{{ .Data.User.GetAvatarURL }}" alt="Profile image" class="img-circle img-responsive center-block profile-image">
             </div>
@@ -37,4 +39,16 @@
         </div>
       </div>
     </div>
+
+    <script type="text/jvascript">
+      function showImage() {
+        var r = new FileReader();
+
+        r.readAsDataURL(document.getEmelentById("AvatarFile").files[0]);
+
+        r.onload = function(e) {
+          document.getElementById("Preview").src = e.target.result;
+        };
+      };
+    </script>
     {{ end }}
