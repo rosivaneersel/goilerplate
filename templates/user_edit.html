@@ -6,7 +6,7 @@
             <input type="hidden" name="UserID" value="{{ .Data.User.ID }}">
 
             <div class="text-center text-primary form-icon">
-              <img src="{{ .Data.User.GetAvatarURL }}" alt="Profile image" class="img-circle img-responsive center-block profile-image">
+              <img id="preview" src="{{ .Data.User.GetAvatarURL }}" alt="Profile image" class="img-circle img-responsive center-block profile-image">
             </div>
 
             <div class="input-group margin-bottom-sm">
@@ -30,7 +30,7 @@
             </div>
             <div class="form-group">
               <label for="avatar_file">Profile image</label>
-              <input type="file" id="avatar_file" name="AvatarFile">
+              <input type="file" onchange="showImage()" id="avatar_file" name="AvatarFile">
             </div>
             {{ .CsrfField }}
             <button type="submit" class="btn btn-primary btn-sm pull-right"><i class="fa fa-floppy-o" aria-hidden="true"></i> Update</button>
@@ -40,14 +40,14 @@
       </div>
     </div>
 
-    <script type="text/jvascript">
+    <script type="text/javascript">
       function showImage() {
         var r = new FileReader();
 
-        r.readAsDataURL(document.getEmelentById("AvatarFile").files[0]);
+        r.readAsDataURL(document.getElementById("avatar_file").files[0]);
 
         r.onload = function(e) {
-          document.getElementById("Preview").src = e.target.result;
+          document.getElementById("preview").src = e.target.result;
         };
       };
     </script>
