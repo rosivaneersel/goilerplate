@@ -215,7 +215,7 @@ func (v *UserViews) AdminIndexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	v.AdminIndexView.Data = map [string]interface{}{"Users": users}
-	v.DisplayView.ExecuteTemplate(w, r)
+	v.AdminIndexView.ExecuteTemplate(w, r)
 }
 
 func NewUserViews(manager UserManager, alerts *alerts.Alerts, templates string, new string, edit string, display string, login string, changepw string, adminIndex string) *UserViews {
