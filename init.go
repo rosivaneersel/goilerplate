@@ -20,7 +20,7 @@ func initWithGorm(db *gorm.DB, r *mux.Router, a *alerts.Alerts, t string) {
 	UserManager := users.NewUserManagerGorm(db)
 	UserManager.Init(false) // Initialize DB on first use and make migrations (if any)
 	// ToDo: Set Template directory via config and make NewUserView use this setting
-	UserViews := users.NewUserViews(UserManager, a, t, "user_register.html", "user_edit.html", "user_show.html", "login.html", "change_password.html")
+	UserViews := users.NewUserViews(UserManager, a, t, "user_register.html", "user_edit.html", "user_show.html", "login.html", "change_password.html", "user_index_admin.html")
 	UserRoutes(r, UserViews)
 }
 

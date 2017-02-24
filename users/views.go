@@ -19,6 +19,8 @@ type UserViews struct {
 	LoginView   *view.View
 	DisplayView *view.View
 
+	AdminIndexView *view.View
+
 	Manager UserManager
 	Router  *mux.Router
 	Alerts  *alerts.Alerts
@@ -205,7 +207,18 @@ func (v *UserViews) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func NewUserViews(manager UserManager, alerts *alerts.Alerts, templates string, new string, edit string, display string, login string, changepw string) *UserViews {
+func (v *UserViews) AdminIndexHandler(w http.ResponseWriter, r *http.Request) {
+	users, err := v.Manager.Find("", "")
+	if err != nil {
+		v.Alerts.New("Error", "alert-danger", err.Error())
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+	v.AdminIndexView.Data = map [string]interface{}{"Users": users}
+	v.DisplayView.ExecuteTemplate(w, r)
+}
+
+func NewUserViews(manager UserManager, alerts *alerts.Alerts, templates string, new string, edit string, display string, login string, changepw string, adminIndex string) *UserViews {
 	views := &UserViews{Manager: manager, Alerts: alerts}
 	views.NewView = view.NewView("Register", "base", alerts, templates+new)
 	views.EditView = view.NewView("Edit", "base", alerts, templates+edit)
@@ -213,5 +226,12 @@ func NewUserViews(manager UserManager, alerts *alerts.Alerts, templates string, 
 	views.ChangePasswordView = view.NewView("Change password", "base", alerts, templates+changepw)
 	views.DisplayView = view.NewView("Account", "base", alerts, templates+display)
 
+	views.AdminIndexView = view.NewView("Admin - Users", "base", alerts, templates+adminIndex)
+
 	return views
 }
+
+//ToDo: Admin views and handlers
+//ToDo: Configuration views
+// Todo: Account activation
+// Todo: Forgotten password
