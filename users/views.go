@@ -8,8 +8,8 @@ import (
 	"github.com/BalkanTech/goilerplate/session"
 	"github.com/gorilla/mux"
 	"io/ioutil"
-
 	"path"
+	"reflect"
 )
 
 type UserViews struct {
@@ -20,6 +20,9 @@ type UserViews struct {
 	DisplayView *view.View
 
 	AdminIndexView *view.View
+	AdminNewView *view.View
+	AdminEditView *view.View
+	AdminDisplayView *view.View
 
 	Manager UserManager
 	Router  *mux.Router
@@ -218,15 +221,49 @@ func (v *UserViews) AdminIndexHandler(w http.ResponseWriter, r *http.Request) {
 	v.AdminIndexView.ExecuteTemplate(w, r)
 }
 
-func NewUserViews(manager UserManager, alerts *alerts.Alerts, templates string, new string, edit string, display string, login string, changepw string, adminIndex string) *UserViews {
-	views := &UserViews{Manager: manager, Alerts: alerts}
-	views.NewView = view.NewView("Register", "base", alerts, templates+new)
-	views.EditView = view.NewView("Edit", "base", alerts, templates+edit)
-	views.LoginView = view.NewView("Login", "base", alerts, templates+login)
-	views.ChangePasswordView = view.NewView("Change password", "base", alerts, templates+changepw)
-	views.DisplayView = view.NewView("Account", "base", alerts, templates+display)
+func (v *UserViews) AdminShowHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
 
-	views.AdminIndexView = view.NewView("Admin - Users", "base", alerts, templates+adminIndex)
+	u, err := v.Manager.GetByID(id)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	v.AdminDisplayView.Data = map [string]interface{}{"User": u}
+	v.AdminDisplayView.ExecuteTemplate(w, r)
+}
+
+type Templates struct {
+	BaseTemplates string
+	New string
+	Edit string
+	Display string
+	Login string
+	ChangePassword string
+
+	AdminIndex string
+	AdminEdit string
+}
+
+func (t *Templates) Get(e string) string {
+	v := reflect.ValueOf(t).Elem().FieldByName(e)
+	if !v.IsValid() {
+		return ""
+	}
+	return t.BaseTemplates + v.String()
+}
+
+func Views(manager UserManager, alerts *alerts.Alerts, t *Templates) *UserViews {
+	views := &UserViews{Manager: manager, Alerts: alerts}
+	views.NewView = view.NewView("Register", "base", alerts, t.Get("New"))
+	views.EditView = view.NewView("Edit", "base", alerts, t.Get("Edit"))
+	views.LoginView = view.NewView("Login", "base", alerts, t.Get("Login"))
+	views.ChangePasswordView = view.NewView("Change password", "base", alerts, t.Get("ChangePassword"))
+	views.DisplayView = view.NewView("Account", "base", alerts, t.Get("Display"))
+
+	views.AdminIndexView = view.NewView("Admin - Users", "base", alerts, t.Get("AdminIndex"))
 
 	return views
 }
