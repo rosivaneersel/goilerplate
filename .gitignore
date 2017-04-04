@@ -8,6 +8,7 @@ _obj
 _test
 .idea
 tmp
+static/avatars
 
 # Architecture specific extensions/prefixes
 *.[568vq]
@@ -26,3 +27,8 @@ _testmain.go
 *.prof
 *.db
 **/.DS_Store
+
+# Files
+goilerplate
+
+
