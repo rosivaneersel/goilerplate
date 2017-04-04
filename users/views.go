@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"path"
 	"reflect"
+	"log"
 )
 
 type UserViews struct {
@@ -217,6 +218,7 @@ func (v *UserViews) AdminIndexHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
+	log.Println(users)
 	v.AdminIndexView.Data = map [string]interface{}{"Users": users}
 	v.AdminIndexView.ExecuteTemplate(w, r)
 }
