@@ -25,6 +25,6 @@ func UserRoutes(r *mux.Router, v *users.UserViews) {
 	//ToDo: Delete
 
 	r.HandleFunc("/admin/user", users.RequireAdmin(v, v.AdminIndexHandler))
-	r.HandleFunc("/admin/user/edit", users.RequireLogin(v, v.UpdateHandler)).Methods("POST")
-	r.HandleFunc("/admin/user/edit/{id}", users.RequireLogin(v, v.EditViewHandler))
+	r.HandleFunc("/admin/user/edit", users.RequireAdmin(v, v.UpdateHandler)).Methods("POST")
+	r.HandleFunc("/admin/user/edit/{id}", users.RequireAdmin(v, v.EditViewHandler))
 }
