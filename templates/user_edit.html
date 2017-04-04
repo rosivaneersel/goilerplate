@@ -32,6 +32,19 @@
               <label for="avatar_file">Profile image</label>
               <input type="file" onchange="showImage()" id="avatar_file" name="AvatarFile">
             </div>
+
+            {{ if .Session.IsAdmin }}
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="IsAdmin" value="1" {{ if .Data.User.IsAdmin }}checked{{ end }}> Administrator
+                </label>
+              </div>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="ChangePassword" value="1" {{ if .Data.User.ChangePassword}}checked{{ end }}> Force change password
+                </label>
+              </div>
+            {{ end }}
             {{ .CsrfField }}
             <button type="submit" class="btn btn-primary btn-sm pull-right"><i class="fa fa-floppy-o" aria-hidden="true"></i> Update</button>
 

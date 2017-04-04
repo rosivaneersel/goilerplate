@@ -1,0 +1,66 @@
+{{define "content"}}
+<div class="row">
+  <div class="col-xs-12">
+    <div class="panel panel-primary">
+      <div class="panel-body">
+        <h1><i class="fa fa-gavel" aria-hidden="true"></i> Admin <small>Users</small></h1>
+      </div>
+        <table class="table table-hover table-bordered table-striped table-primary">
+          <thead>
+          <tr class="bg-gray">
+            <th>ID</th>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Change password</th>
+            <th>Admin</th>
+            <th>Created</th>
+            <th>Updated</th>
+            <th>Deleted</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ if .Data.Users }}
+            {{ range $index, $user := .Data.Users }}
+              <tr>
+                <td>{{ $user.ID }}</td>
+                <td>{{ $user.Profile.FirstName }} {{ $user.Profile.LastName }}</td>
+                <td>{{ $user.Username }}</td>
+                <td>{{ $user.Email }}</td>
+                <td class="text-center">
+                  {{ if $user.ChangePassword }}
+                    <i class="fa fa-check text-success" aria-hidden="true"></i>
+                  {{ else }}
+                    <i class="fa fa-times text-danger" aria-hidden="true"></i>
+                  {{ end }}
+                </td>
+                <td class="text-center">
+                  {{ if $user.IsAdmin }}
+                    <i class="fa fa-check text-success" aria-hidden="true"></i>
+                  {{ else }}
+                    <i class="fa fa-times text-danger" aria-hidden="true"></i>
+                  {{ end }}
+                </td>
+                <td>{{ $user.CreatedAt.Format "02 Jan 2006 15:04:05" }}</td>
+                <td>{{ $user.UpdatedAt.Format "02 Jan 2006 15:04:05" }}</td>
+                <td class="text-center">
+                  {{ if $user.DeletedAt }}
+                    {{ $user.DeletedAt.Format "02 Jan 2006 15:04:05" }}
+                  {{ else }}
+                    <i class="fa fa-times text-danger" aria-hidden="true"></i>
+                  {{ end }}
+                </td>
+                <td class="text-center">
+                  <a href="/admin/user/edit/{{ $user.ID }}"><i class="fa fa-pencil-square" aria-hidden="true"></i></a>
+                  <a href="/admin/user/delete/{{ $user.ID }}"><i class="fa fa-trash text-danger" aria-hidden="true"></i></a>
+                </td>
+              </tr>
+            {{ end }}
+          {{ end }}
+        </tbody>
+        </table>
+    </div>
+  </div>
+</div>
+{{ end }}
