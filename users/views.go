@@ -10,7 +10,6 @@ import (
 	"io/ioutil"
 	"path"
 	"reflect"
-	"golang.org/x/tools/go/gcimporter15/testdata"
 )
 
 type UserViews struct {
