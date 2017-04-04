@@ -192,7 +192,7 @@ func (v *UserViews) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session.CreateSession(u.ID(), u.Username, w)
+	session.CreateSession(u.ID(), u.Username, u.IsAdmin, w)
 	if u.ChangePassword {
 		v.Alerts.New("Warning", "alert-warning", "You need to change your password.")
 		http.Redirect(w, r, "/", http.StatusFound)
