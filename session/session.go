@@ -1,13 +1,14 @@
 package session
 
 import (
-	"net/http"
 	"github.com/gorilla/securecookie"
+	"net/http"
 )
 
 type ActiveUser struct {
 	ID       string
 	Username string
+	IsAdmin  bool
 }
 
 var cookieHandler = securecookie.New(
@@ -15,10 +16,11 @@ var cookieHandler = securecookie.New(
 	securecookie.GenerateRandomKey(32),
 )
 
-func CreateSession(id string, username string, w http.ResponseWriter) {
+func CreateSession(id string, username string, admin bool, w http.ResponseWriter) {
 	v := map[string]interface{}{
 		"id":       id,
 		"username": username,
+		"isadmin":  admin,
 	}
 
 	if encoded, err := cookieHandler.Encode("session", v); err == nil {
@@ -52,5 +54,5 @@ func GetUser(r *http.Request) (user ActiveUser, err error) {
 	if err = cookieHandler.Decode("session", c.Value, &cValue); err != nil {
 		return user, err
 	}
-	return ActiveUser{ID: cValue["id"].(string), Username: cValue["username"].(string)}, nil
+	return ActiveUser{ID: cValue["id"].(string), Username: cValue["username"].(string), IsAdmin: cValue["isadmin"].(bool)}, nil
 }
