@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"path"
 	"reflect"
+	"golang.org/x/tools/go/gcimporter15/testdata"
 )
 
 type UserViews struct {
@@ -62,13 +63,27 @@ func (v *UserViews) CreateHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (v *UserViews) EditViewHandler(w http.ResponseWriter, r *http.Request) {
+	u := &User{}
 	a, _ := session.GetUser(r)
 
-	u, err := v.Manager.GetByID(a.ID)
+	au, err := v.Manager.GetByID(a.ID)
 	if err != nil {
 		v.Alerts.New("Error", "alert-danger", err.Error())
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
+	}
+
+	if au.IsAdmin {
+		vars := mux.Vars(r)
+		id := vars["id"]
+		u, err = v.Manager.GetByID(id)
+		if err != nil {
+			v.Alerts.New("Error", "alert-danger", err.Error())
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+	} else {
+		u = au
 	}
 
 	v.EditView.Data = map [string]interface{}{"User": u}
