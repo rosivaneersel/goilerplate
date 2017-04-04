@@ -45,4 +45,11 @@ body {
 }
 .profile-image {
   height: 90px;
+  width: 90px;
+}
+.table-primary, .table-primary td, .table-primary th{
+  border-color: #337ab7 !important;
+}
+tr.bg-gray{
+  background-color: #e6e6e6;
 }
