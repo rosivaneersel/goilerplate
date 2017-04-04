@@ -115,8 +115,8 @@ func (v *UserViews) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 	u.Profile.FirstName = firstName
 	u.Profile.LastName = lastName
 	if(au.IsAdmin) {
-		u.IsAdmin = bool(r.FormValue("IsAdmin"))
-		u.ChangePassword = bool(r.FormValue("ChangePassword"))
+		u.IsAdmin = r.FormValue("IsAdmin") == ""
+		u.ChangePassword = r.FormValue("ChangePassword") == ""
 	}
 
 	// Update avatar
