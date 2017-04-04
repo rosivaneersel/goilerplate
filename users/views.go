@@ -10,7 +10,6 @@ import (
 	"io/ioutil"
 	"path"
 	"reflect"
-	"log"
 )
 
 type UserViews struct {
