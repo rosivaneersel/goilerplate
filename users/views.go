@@ -90,6 +90,8 @@ func (v *UserViews) EditViewHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (v *UserViews) UpdateHandler(w http.ResponseWriter, r *http.Request) {
+	au, _ := session.GetUser(r)
+
 	userID := r.FormValue("UserID")
 	username := r.FormValue("Username")
 	email := r.FormValue("Email")
@@ -99,7 +101,12 @@ func (v *UserViews) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 	u, err := v.Manager.GetByID(userID)
 	if err != nil {
 		v.Alerts.New("Error", "alert-danger", err.Error())
-		http.Redirect(w, r, "/account/edit", http.StatusFound)
+		if au.IsAdmin {
+			http.Redirect(w, r, "/admin/user/edit/" + userID, http.StatusFound)
+		} else {
+			http.Redirect(w, r, "/account/edit", http.StatusFound)
+		}
+
 		return
 	}
 
@@ -145,9 +152,12 @@ func (v *UserViews) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	v.Alerts.New("Success", "alert-success", "Your profile has been updated successfully")
-	http.Redirect(w, r, "/account", http.StatusFound)
+	if(au.IsAdmin) {
+		http.Redirect(w, r, "/admin/user", http.StatusFound)
+	} else {
+		http.Redirect(w, r, "/account", http.StatusFound)
+	}
 	return
-
 }
 
 func (v *UserViews) DisplayViewHandler(w http.ResponseWriter, r *http.Request) {
