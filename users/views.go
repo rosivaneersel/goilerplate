@@ -114,6 +114,10 @@ func (v *UserViews) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 	u.Username = username
 	u.Profile.FirstName = firstName
 	u.Profile.LastName = lastName
+	if(au.IsAdmin) {
+		u.IsAdmin = bool(r.FormValue("IsAdmin"))
+		u.ChangePassword = bool(r.FormValue("ChangePassword"))
+	}
 
 	// Update avatar
 	// Get file data from form
