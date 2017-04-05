@@ -1,16 +1,16 @@
 package users
 
 import (
+	"crypto/md5"
+	"encoding/hex"
+	"errors"
+	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/mgo.v2/bson"
-	"time"
-	"strconv"
-	"crypto/md5"
 	"io"
+	"strconv"
 	"strings"
-	"errors"
-	"encoding/hex"
-	"fmt"
+	"time"
 )
 
 const (
@@ -24,16 +24,19 @@ type User struct {
 	GID uint          `gorm:"column:id; primary_key" bson:"-"`
 	MID bson.ObjectId `bson:"_id" gorm:"-"`
 
-	Username  string
-	Email     string
-	EmailMD5 string
-	Password  string
+	Username       string
+	Email          string
+	EmailMD5       string
+	Password       string
 	ChangePassword bool
-	IsAdmin bool
-	Profile Profile
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time
+	IsActive       bool
+	ActivationCode string
+	IsAdmin        bool
+	Profile        Profile
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	Deleted	       *time.Time
+	DeletedAt      *time.Time
 }
 
 func (u *User) ID() string {

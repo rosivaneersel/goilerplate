@@ -7,9 +7,13 @@ import (
 	"github.com/BalkanTech/goilerplate/view"
 	"github.com/BalkanTech/goilerplate/session"
 	"github.com/gorilla/mux"
-	"io/ioutil"
 	"path"
 	"reflect"
+	"crypto/md5"
+	"io"
+	"io/ioutil"
+	"time"
+	"encoding/hex"
 )
 
 type UserViews struct {
@@ -49,6 +53,20 @@ func (v *UserViews) CreateHandler(w http.ResponseWriter, r *http.Request) {
 	newUser.Profile.LastName = lastName
 	newUser.SetPassword(password)
 
+	au, _ := session.GetUser(r)
+	if(au.IsAdmin) {
+		newUser.IsAdmin = r.FormValue("IsAdmin") != ""
+
+	} else {
+		newUser.IsAdmin = false
+	}
+
+	newUser.IsActive = false
+
+	h := md5.New()
+	io.WriteString(h, time.Now().String())
+	newUser.ActivationCode = hex.EncodeToString(h.Sum(nil))
+
 	err := v.Manager.Create(newUser)
 	if err != nil {
 		v.Alerts.New("Error", "alert-danger", err.Error())
@@ -56,8 +74,12 @@ func (v *UserViews) CreateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	v.Alerts.New("Success", "alert-info", "You have successfully registered your account. Please check your email to activate your account.")
-	http.Redirect(w, r, "/", http.StatusFound)
+	v.Alerts.New("Success", "alert-info", "You have successfully registered an account. Please check your email for activation instructions.")
+	if au.IsAdmin {
+		http.Redirect(w, r, "/admin/user", http.StatusFound)
+	} else {
+		http.Redirect(w, r, "/", http.StatusFound)
+	}
 	return
 }
 
@@ -90,14 +112,13 @@ func (v *UserViews) EditViewHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (v *UserViews) UpdateHandler(w http.ResponseWriter, r *http.Request) {
-	au, _ := session.GetUser(r)
-
 	userID := r.FormValue("UserID")
 	username := r.FormValue("Username")
 	email := r.FormValue("Email")
 	firstName := r.FormValue("FirstName")
 	lastName := r.FormValue("LastName")
 
+	au, _ := session.GetUser(r)
 	u, err := v.Manager.GetByID(userID)
 	if err != nil {
 		v.Alerts.New("Error", "alert-danger", err.Error())
@@ -117,6 +138,11 @@ func (v *UserViews) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 	if au.IsAdmin {
 		u.IsAdmin = r.FormValue("IsAdmin") != ""
 		u.ChangePassword = r.FormValue("ChangePassword") != ""
+
+		u.IsActive = r.FormValue("IsActive") != ""
+		if u.IsActive && u.ActivationCode != ""{
+			u.ActivationCode = ""
+		}
 	}
 
 	// Update avatar
@@ -165,9 +191,17 @@ func (v *UserViews) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (v *UserViews) DisplayViewHandler(w http.ResponseWriter, r *http.Request) {
-	a, _ := session.GetUser(r)
+	var id string
 
-	u, err := v.Manager.GetByID(a.ID)
+	au, _ := session.GetUser(r)
+	if au.IsAdmin {
+		vars := mux.Vars(r)
+		id = vars["id"]
+	} else {
+		id = au.ID
+	}
+
+	u, err := v.Manager.GetByID(id)
 	if err != nil {
 		v.Alerts.New("Error", "alert-danger", err.Error())
 		http.Redirect(w, r, "/", http.StatusFound)
@@ -199,6 +233,7 @@ func (v *UserViews) ChangePasswordHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	user.SetPassword(newpassword)
+	user.ChangePassword = false;
 	session.DestroySession(w)
 	v.Manager.Update(user)
 	v.Alerts.New("Success", "alert-success", "Your password has been updated. Please login again with your new password.")
@@ -215,7 +250,13 @@ func (v *UserViews) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	u, err := v.Manager.Authenticate(login, password, AuthByUsernameOrEmail)
 	if err != nil {
-		v.Alerts.New("Error", "alert-danger", "Invalid login")
+		v.Alerts.New("Error", "alert-danger", "Invalid login.")
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
+	}
+
+	if !u.IsActive {
+		v.Alerts.New("Activation", "alert-info", "The account hasn't been activated.")
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return
 	}
@@ -223,7 +264,7 @@ func (v *UserViews) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	session.CreateSession(u.ID(), u.Username, u.IsAdmin, w)
 	if u.ChangePassword {
 		v.Alerts.New("Warning", "alert-warning", "You need to change your password.")
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/change_password", http.StatusFound)
 		return
 	}
 	v.Alerts.New("Success", "alert-success", "You have succesfully logged in.")
@@ -235,6 +276,125 @@ func (v *UserViews) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	session.DestroySession(w)
 	v.Alerts.New("Success", "alert-success", "You have succesfully logged out.")
 	http.Redirect(w, r, "/", http.StatusFound)
+	return
+}
+
+func (v *UserViews) ActivationHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	code := vars["activationcode"]
+
+	u, err := v.Manager.Get(User{ActivationCode: code})
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	u.IsActive = true
+	u.ActivationCode = ""
+	err = v.Manager.Update(u)
+	if err != nil {
+		v.Alerts.New("Error", "alert-danger", "The account couldn't be activated.")
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
+	v.Alerts.New("Success", "alert-sucess", "The account has been activated.")
+	http.Redirect(w, r, "/", http.StatusFound)
+	return
+}
+
+func (v *UserViews) DeleteHandler(w http.ResponseWriter, r *http.Request) {
+	var id string
+	vars := mux.Vars(r)
+
+	au, _ := session.GetUser(r)
+	if au.IsAdmin && vars["id"] != "" {
+		id = vars["id"]
+	} else {
+		id = au.ID
+	}
+
+	u, err := v.Manager.GetByID(id)
+	if err != nil {
+		v.Alerts.New("Error", "alert-danger", err.Error())
+		if au.IsAdmin {
+			http.Redirect(w, r, "/admin/user", http.StatusFound)
+		} else {
+			http.Redirect(w, r, "/account", http.StatusFound)
+		}
+		return
+	}
+
+	now := time.Now()
+	u.Deleted = &now
+	h := md5.New()
+	io.WriteString(h, time.Now().String())
+	u.ActivationCode = hex.EncodeToString(h.Sum(nil))
+
+	err = v.Manager.Update(u)
+	if err != nil {
+		v.Alerts.New("Error", "alert-danger", "The account couldn't be deleted.")
+		if au.IsAdmin {
+			http.Redirect(w, r, "/admin/user", http.StatusFound)
+		} else {
+			http.Redirect(w, r, "/account", http.StatusFound)
+		}
+		return
+	}
+
+	v.Alerts.New("Success", "alert-success", "The account has been deleted.")
+	if au.IsAdmin {
+		http.Redirect(w, r, "/admin/user", http.StatusFound)
+	} else {
+		http.Redirect(w, r, "/account", http.StatusFound)
+	}
+	return
+}
+
+func (v *UserViews) UndeleteHandler(w http.ResponseWriter, r *http.Request) {
+	au, _ := session.GetUser(r)
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	u, err := v.Manager.GetByID(id)
+	if err != nil {
+		v.Alerts.New("Error", "alert-danger", err.Error())
+		if au.IsAdmin {
+			http.Redirect(w, r, "/admin/user", http.StatusFound)
+		} else {
+			http.Redirect(w, r, "/", http.StatusFound)
+		}
+		return
+	}
+
+	if !au.IsAdmin {
+		code := vars["code"]
+		if u.ActivationCode != code {
+			v.Alerts.New("Error", "alert-danger", "The account couldn't be undeleted.")
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+	}
+
+	u.Deleted = nil
+	u.ActivationCode = ""
+	err = v.Manager.Update(u)
+	if err != nil {
+		v.Alerts.New("Error", "alert-danger", "The account couldn't be undeleted.")
+		if au.IsAdmin {
+			http.Redirect(w, r, "/admin/user", http.StatusFound)
+		} else {
+			http.Redirect(w, r, "/", http.StatusFound)
+		}
+		return
+	}
+
+	v.Alerts.New("Success", "alert-success", "The account has been undeleted.")
+	if au.IsAdmin {
+		http.Redirect(w, r, "/admin/user", http.StatusFound)
+	} else {
+		http.Redirect(w, r, "/", http.StatusFound)
+	}
 	return
 }
 
@@ -296,7 +456,9 @@ func Views(manager UserManager, alerts *alerts.Alerts, t *Templates) *UserViews 
 	return views
 }
 
-//ToDo: Admin views and handlers
-//ToDo: Configuration views
+// ToDo: Admin views and handlers
+// ToDo: Configuration views
 // Todo: Account activation
 // Todo: Forgotten password
+// Todo: Replace GORM with native DB's
+// Todo: Undelete and admin index query for ignoring soft delete

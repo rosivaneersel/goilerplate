@@ -61,7 +61,7 @@ func (o *UserGorm) GetByID(id string) (*User, error) {
 func (o *UserGorm) GetByEmail(email string) (*User, error) {
 	user := &User{}
 
-	err := o.DB.Where("email = ?", email).First(user).Error
+	err := o.DB.Where("email = ? AND \"users\".deleted IS NULL", email).First(user).Error
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (o *UserGorm) GetByEmail(email string) (*User, error) {
 // Returns *User and and error
 func (o *UserGorm) Get(query interface{}, values ...interface{}) (*User, error) {
 	user := &User{}
-	err := o.DB.Where(query, values...).First(user).Error
+	err := o.DB.Where(query, values...).Where("\"users\".deleted IS NULL").First(user).Error
 	if err != nil {
 		return nil, err
 	}
@@ -113,11 +113,11 @@ func (o *UserGorm) Authenticate(user string, password string, authBy uint) (*Use
 	var err error
 
 	if authBy == AuthByUsername {
-		err = o.DB.Where("username = ?", user).First(u).Error
+		err = o.DB.Where("username = ? AND \"users\".deleted IS NULL", user, true).First(u).Error
 	} else if authBy == AuthByEmail {
-		err = o.DB.Where("email = ?", user).First(u).Error
+		err = o.DB.Where("email = ? AND \"users\".deleted IS NULL", user, true).First(u).Error
 	} else if authBy == AuthByUsernameOrEmail {
-		err = o.DB.Where("email = ? OR username = ?", user, user).First(u).Error
+		err = o.DB.Where("(email = ? OR username = ?) AND \"users\".deleted IS NULL", user, user, true).First(u).Error
 	} else {
 		err = errors.New("Invalid authBy value")
 	}

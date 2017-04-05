@@ -18,13 +18,20 @@ func UserRoutes(r *mux.Router, v *users.UserViews) {
 	r.HandleFunc("/change_password", users.RequireLogin(v, v.ChangePasswordView.DefaultHandler))
 
 	r.HandleFunc("/account", users.RequireLogin(v, v.DisplayViewHandler))
-
+	r.HandleFunc("/account/activate/{code}", v.ActivationHandler)
 	r.HandleFunc("/account/edit", users.RequireLogin(v, v.UpdateHandler)).Methods("POST")
 	r.HandleFunc("/account/edit", users.RequireLogin(v, v.EditViewHandler))
+	r.HandleFunc("/account/delete", users.RequireLogin(v, v.DeleteHandler))
+	r.HandleFunc("/account/undelete/{id}/{code}", users.RequireLogin(v, v.UndeleteHandler))
+
 
 	//ToDo: Delete
 
 	r.HandleFunc("/admin/user", users.RequireAdmin(v, v.AdminIndexHandler))
+	r.HandleFunc("/admin/user/add", users.RequireAdmin(v, v.NewView.DefaultHandler))
+	r.HandleFunc("/admin/user/view/{id}", users.RequireAdmin(v, v.DisplayViewHandler))
 	r.HandleFunc("/admin/user/edit", users.RequireAdmin(v, v.UpdateHandler)).Methods("POST")
 	r.HandleFunc("/admin/user/edit/{id}", users.RequireAdmin(v, v.EditViewHandler))
+	r.HandleFunc("/admin/user/delete/{id}", users.RequireAdmin(v, v.DeleteHandler))
+	r.HandleFunc("/admin/user/undelete/{id}", users.RequireAdmin(v, v.UndeleteHandler))
 }
