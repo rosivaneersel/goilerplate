@@ -14,6 +14,7 @@ import (
 	"io/ioutil"
 	"time"
 	"encoding/hex"
+	"log"
 )
 
 type UserViews struct {
@@ -289,6 +290,7 @@ func (v *UserViews) ActivationHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+	log.Printf("%+v", u)
 
 	u.IsActive = true
 	u.ActivationCode = ""
@@ -299,7 +301,7 @@ func (v *UserViews) ActivationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	v.Alerts.New("Success", "alert-sucess", "The account has been activated.")
+	v.Alerts.New("Success", "alert-success", "The account has been activated.")
 	http.Redirect(w, r, "/", http.StatusFound)
 	return
 }
