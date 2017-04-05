@@ -56,6 +56,7 @@ func (v *UserViews) CreateHandler(w http.ResponseWriter, r *http.Request) {
 	au, _ := session.GetUser(r)
 	if(au.IsAdmin) {
 		newUser.IsAdmin = r.FormValue("IsAdmin") != ""
+		newUser.ChangePassword = r.FormValue("ChangePassword") != ""
 
 	} else {
 		newUser.IsAdmin = false
@@ -462,3 +463,4 @@ func Views(manager UserManager, alerts *alerts.Alerts, t *Templates) *UserViews 
 // Todo: Forgotten password
 // Todo: Replace GORM with native DB's
 // Todo: Undelete and admin index query for ignoring soft delete
+// Todo: Prevent deletion of own account if active admin user

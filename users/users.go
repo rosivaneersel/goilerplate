@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"github.com/BalkanTech/goilerplate/session"
 )
 
 const (
@@ -106,3 +107,5 @@ type Users struct {
 func UserController(m UserManager) *Users {
 	return &Users{UserManager: m}
 }
+
+// Todo: User FuncMap with IsActiveUserID
