@@ -11,6 +11,10 @@ type ActiveUser struct {
 	IsAdmin  bool
 }
 
+func (a *ActiveUser) IsCurrentUserID(id string) bool {
+	return a.ID == id
+}
+
 var cookieHandler = securecookie.New(
 	securecookie.GenerateRandomKey(64),
 	securecookie.GenerateRandomKey(32),
