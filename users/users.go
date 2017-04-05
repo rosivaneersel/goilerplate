@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"github.com/BalkanTech/goilerplate/session"
 )
 
 const (
