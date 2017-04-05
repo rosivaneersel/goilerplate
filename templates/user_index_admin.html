@@ -12,6 +12,7 @@
             <th>Name</th>
             <th>Username</th>
             <th>Email</th>
+            <th>Active</th>
             <th>Change password</th>
             <th>Admin</th>
             <th>Created</th>
@@ -29,6 +30,13 @@
                 <td>{{ $user.Username }}</td>
                 <td>{{ $user.Email }}</td>
                 <td class="text-center">
+                  {{ if $user.IsActive }}
+                    <i class="fa fa-check text-success" aria-hidden="true"></i>
+                  {{ else }}
+                    <i class="fa fa-times text-danger" aria-hidden="true"></i>
+                  {{ end }}
+                </td>
+                <td class="text-center">
                   {{ if $user.ChangePassword }}
                     <i class="fa fa-check text-success" aria-hidden="true"></i>
                   {{ else }}
@@ -45,15 +53,21 @@
                 <td>{{ $user.CreatedAt.Format "02 Jan 2006 15:04:05" }}</td>
                 <td>{{ $user.UpdatedAt.Format "02 Jan 2006 15:04:05" }}</td>
                 <td class="text-center">
-                  {{ if $user.DeletedAt }}
-                    {{ $user.DeletedAt.Format "02 Jan 2006 15:04:05" }}
+                  {{ if $user.Deleted }}
+                    {{ $user.Deleted.Format "02 Jan 2006 15:04:05" }}
                   {{ else }}
                     <i class="fa fa-times text-danger" aria-hidden="true"></i>
                   {{ end }}
                 </td>
                 <td class="text-center">
                   <a href="/admin/user/edit/{{ $user.ID }}"><i class="fa fa-pencil-square" aria-hidden="true"></i></a>
-                  <a href="/admin/user/delete/{{ $user.ID }}"><i class="fa fa-trash text-danger" aria-hidden="true"></i></a>
+                  {{ if $user.Deleted }}
+                    <a href="/admin/user/undelete/{{ $user.ID }}"><i class="fa fa-undo text-primary" aria-hidden="true"></i></a>
+                  {{ else }}
+                    {{ if not $user.IsAdmin }}
+                      <a href="/admin/user/delete/{{ $user.ID }}"><i class="fa fa-trash text-danger" aria-hidden="true"></i></a>
+                    {{ end}}
+                  {{ end }}
                 </td>
               </tr>
             {{ end }}

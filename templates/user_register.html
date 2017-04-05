@@ -26,8 +26,22 @@
               <span class="input-group-addon" id="password2"><i class="fa fa-key fa-fw"></i></span>
               <input class="form-control" type="password" placeholder="Confirm password" aria-describedby="password2" name="Password2">
             </div>
+
+            {{ if .Session.IsAdmin }}
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="IsAdmin" value="1" {{ if .Data.User.IsAdmin }}checked{{ end }}> Administrator
+                </label>
+              </div>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="ChangePassword" value="1" {{ if .Data.User.ChangePassword}}checked{{ end }}> Force change password
+                </label>
+              </div>
+              {{ end }}
+
             {{ .CsrfField }}
-            <button type="submit" class="btn btn-primary btn-sm pull-right"><i class="fa fa-user-plus" aria-hidden="true"></i> Register</button>
+            <button type="submit" class="btn btn-primary btn-sm pull-right"><i class="fa fa-user-plus" aria-hidden="true"></i> {{ if .Session.IsAdmin }}Add{{ else }}Register{{ end }}</button>
 
           </form>
         </div>
